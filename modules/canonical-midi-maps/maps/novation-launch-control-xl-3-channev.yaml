@@ -37,7 +37,7 @@ mappings:
     midiInput:
       type: "cc"
       channel: 1
-      number: 13
+      number: 5
       behavior:
         mode: "absolute"
         curve: "linear"
@@ -94,7 +94,7 @@ mappings:
     midiInput:
       type: "cc"
       channel: 1
-      number: 14
+      number: 6
       behavior:
         mode: "absolute"
         curve: "linear"
@@ -155,7 +155,7 @@ mappings:
     midiInput:
       type: "cc"
       channel: 1
-      number: 5
+      number: 13
       behavior:
         mode: "absolute"
         curve: "exponential"
@@ -222,7 +222,7 @@ mappings:
     midiInput:
       type: "cc"
       channel: 1
-      number: 6
+      number: 14
       behavior:
         mode: "absolute"
         curve: "exponential"
