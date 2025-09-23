@@ -12,6 +12,7 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSync } from 'fs';
 import { join, basename, extname, dirname } from 'path';
 import { homedir } from 'os';
+import { fileURLToPath } from 'url';
 import { CanonicalMapParser } from '../../canonical-midi-maps/src/index.js';
 import { MidiMapBuilder, ArdourXMLSerializer } from '../src/index.js';
 
@@ -20,6 +21,11 @@ interface ConversionResult {
   ardour: string;
   success: boolean;
   error?: string;
+}
+
+interface ArdourBinding {
+  function?: string;
+  uri?: string;
 }
 
 /**
@@ -42,65 +48,75 @@ function getArdourMidiMapsDir(): string {
 }
 
 /**
- * Convert canonical mapping to appropriate Ardour function
+ * Convert canonical mapping to appropriate Ardour binding
  */
-function convertToArdourFunction(mapping: any): string {
+function convertToArdourBinding(mapping: any): ArdourBinding {
   const category = mapping.pluginTarget.category?.toLowerCase() || '';
   const name = mapping.pluginTarget.name?.toLowerCase() || '';
   const paramId = mapping.pluginTarget.identifier;
 
-  // Handle bypass controls
+  // Handle bypass controls - these can use function syntax
   if (mapping.pluginTarget.type === 'bypass') {
-    return 'toggle-plugin-bypass';
+    return { function: 'toggle-plugin-bypass' };
   }
 
-  // Map based on parameter category and name
+  // Check if this is a plugin parameter that should use URI
+  if (mapping.pluginTarget.type === 'parameter') {
+    // Use Ardour URI format: /route/plugin/parameter TRACK PLUGIN_SLOT PARAM_ID
+    // Use S1 (selected strip) for plugin parameters to control currently selected track
+    return { uri: `/route/plugin/parameter S1 1 ${paramId}` };
+  }
+
+  // Handle global/transport controls with function syntax
+  if (category.includes('global')) {
+    if (name.includes('bypass')) {
+      return { function: 'toggle-plugin-bypass' };
+    } else if (name.includes('window')) {
+      return { function: 'toggle-editor-window' };
+    } else {
+      return { function: 'track-select[1]' };
+    }
+  }
+
+  // Default to track controls for other types
   if (category.includes('preamp') || name.includes('gain')) {
     if (name.includes('mic')) {
-      return 'track-set-gain[1]';
+      return { function: 'track-set-gain[1]' };
     } else {
-      return 'track-set-trim[1]';
+      return { function: 'track-set-trim[1]' };
     }
   } else if (category.includes('eq')) {
     // Map EQ bands to different sends for demonstration
     if (name.includes('low') && !name.includes('mid')) {
-      return 'track-set-send-gain[1,1]';
+      return { function: 'track-set-send-gain[1,1]' };
     } else if (name.includes('low-mid') || name.includes('low mid')) {
-      return 'track-set-send-gain[1,2]';
+      return { function: 'track-set-send-gain[1,2]' };
     } else if (name.includes('high-mid') || name.includes('high mid')) {
-      return 'track-set-send-gain[1,3]';
+      return { function: 'track-set-send-gain[1,3]' };
     } else if (name.includes('high') && !name.includes('mid')) {
-      return 'track-set-send-gain[1,4]';
+      return { function: 'track-set-send-gain[1,4]' };
     } else {
-      return 'track-set-send-gain[1,1]';
+      return { function: 'track-set-send-gain[1,1]' };
     }
   } else if (category.includes('compressor') || name.includes('comp')) {
     if (name.includes('threshold')) {
-      return 'track-set-send-gain[1,5]';
+      return { function: 'track-set-send-gain[1,5]' };
     } else if (name.includes('ratio')) {
-      return 'track-set-send-gain[1,6]';
+      return { function: 'track-set-send-gain[1,6]' };
     } else if (name.includes('release')) {
-      return 'track-set-send-gain[1,7]';
+      return { function: 'track-set-send-gain[1,7]' };
     } else {
-      return 'track-set-send-gain[1,8]';
+      return { function: 'track-set-send-gain[1,8]' };
     }
   } else if (category.includes('limiter') || name.includes('limit')) {
-    return 'track-set-trim[1]';
+    return { function: 'track-set-trim[1]' };
   } else if (category.includes('tape') || name.includes('tape')) {
-    return 'track-set-pan[1]';
+    return { function: 'track-set-pan[1]' };
   } else if (category.includes('filter')) {
-    return 'track-set-send-gain[1,1]';
-  } else if (category.includes('global')) {
-    if (name.includes('bypass')) {
-      return 'toggle-plugin-bypass';
-    } else if (name.includes('window')) {
-      return 'toggle-editor-window';
-    } else {
-      return 'track-select[1]';
-    }
+    return { function: 'track-set-send-gain[1,1]' };
   } else {
-    // Generic parameter control - use plugin parameter syntax
-    return `plugin-parameter[${paramId}]`;
+    // Generic parameter control - use URI for plugin parameters on selected strip
+    return { uri: `/route/plugin/parameter S1 1 ${paramId}` };
   }
 }
 
@@ -126,13 +142,14 @@ function convertCanonicalToArdour(canonicalPath: string): string {
   // Convert each mapping
   for (const mapping of map.mappings) {
     const channel = mapping.midiInput.channel || 1;
-    const ardourFunction = convertToArdourFunction(mapping);
+    const ardourBinding = convertToArdourBinding(mapping);
 
     if (mapping.midiInput.type === 'cc') {
       ardourBuilder.addCCBinding({
         channel,
         controller: mapping.midiInput.number || 0,
-        function: ardourFunction,
+        function: ardourBinding.function,
+        uri: ardourBinding.uri,
         encoder: mapping.midiInput.behavior?.mode === 'relative',
         momentary: false,
       });
@@ -140,7 +157,8 @@ function convertCanonicalToArdour(canonicalPath: string): string {
       ardourBuilder.addNoteBinding({
         channel,
         note: mapping.midiInput.number || 0,
-        function: ardourFunction,
+        function: ardourBinding.function,
+        uri: ardourBinding.uri,
         momentary: mapping.midiInput.behavior?.mode === 'momentary',
       });
     }
@@ -197,6 +215,8 @@ async function generateArdourMaps(install: boolean = false): Promise<void> {
   console.log('🎛️  Generating Ardour MIDI Maps from Canonical Maps\\n');
 
   // Find canonical maps
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = dirname(__filename);
   const mapsDir = join(__dirname, '..', '..', 'canonical-midi-maps', 'maps');
   const canonicalMaps = findCanonicalMaps(mapsDir);
 
@@ -266,9 +286,22 @@ async function generateArdourMaps(install: boolean = false): Promise<void> {
       const outputPath = join(outputDir, ardourFilename);
 
       // Create consolidated Ardour map with ALL mappings from this controller
+      let deviceInfo: any = undefined;
+
+      // Add DeviceInfo for controllers with multiple channels/faders
+      if (controllerKey.includes('Launch Control XL')) {
+        deviceInfo = {
+          'device-name': `${firstMap.controller.manufacturer} ${firstMap.controller.model}`,
+          'device-info': {
+            'bank-size': 8, // 8 fader banks on Launch Control XL
+          }
+        };
+      }
+
       const ardourBuilder = new MidiMapBuilder({
         name: `${firstMap.controller.manufacturer} ${firstMap.controller.model}`,
         version: '1.0.0',
+        deviceInfo: deviceInfo,
       });
 
       let totalMappings = 0;
@@ -279,13 +312,14 @@ async function generateArdourMaps(install: boolean = false): Promise<void> {
 
         for (const mapping of map.mappings) {
           const channel = mapping.midiInput.channel || 1;
-          const ardourFunction = convertToArdourFunction(mapping);
+          const ardourBinding = convertToArdourBinding(mapping);
 
           if (mapping.midiInput.type === 'cc') {
             ardourBuilder.addCCBinding({
               channel,
               controller: mapping.midiInput.number || 0,
-              function: ardourFunction,
+              function: ardourBinding.function,
+              uri: ardourBinding.uri,
               encoder: mapping.midiInput.behavior?.mode === 'relative',
               momentary: false,
             });
@@ -293,7 +327,8 @@ async function generateArdourMaps(install: boolean = false): Promise<void> {
             ardourBuilder.addNoteBinding({
               channel,
               note: mapping.midiInput.number || 0,
-              function: ardourFunction,
+              function: ardourBinding.function,
+              uri: ardourBinding.uri,
               momentary: mapping.midiInput.behavior?.mode === 'momentary',
             });
           }

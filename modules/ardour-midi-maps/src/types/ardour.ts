@@ -2,7 +2,9 @@ export interface ArdourBinding {
   channel: number;
   ctl?: number;
   note?: number;
-  function: string;
+  'enc-r'?: number;
+  function?: string;
+  uri?: string;
   action?: string;
   encoder?: 'yes' | 'no';
   rpn?: number;
@@ -17,6 +19,7 @@ export interface ArdourMidiMap {
   name: string;
   version?: string;
   bindings: ArdourBinding[];
+  deviceInfo?: ArdourDeviceInfo;
 }
 
 export interface ArdourDeviceInfo {

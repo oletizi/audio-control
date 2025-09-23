@@ -20,6 +20,11 @@ export class ArdourXMLSerializer {
       `<ArdourMIDIBindings version="1.0.0" name="${this.escapeXML(midiMap.name)}">`,
     ];
 
+    // Add DeviceInfo if present
+    if (midiMap.deviceInfo) {
+      lines.push(this.serializeDeviceInfoElement(midiMap.deviceInfo));
+    }
+
     for (const binding of midiMap.bindings) {
       lines.push(this.indent + this.serializeBinding(binding));
     }
@@ -51,6 +56,19 @@ export class ArdourXMLSerializer {
     return lines.join(this.newline);
   }
 
+  private serializeDeviceInfoElement(deviceInfo: ArdourDeviceInfo): string {
+    const info = deviceInfo['device-info'];
+    const attributes: string[] = [];
+
+    for (const [key, value] of Object.entries(info)) {
+      if (value !== undefined) {
+        attributes.push(`${key}="${value}"`);
+      }
+    }
+
+    return `<DeviceInfo ${attributes.join(' ')}/>`;
+  }
+
   private serializeBinding(binding: ArdourBinding): string {
     const attributes: string[] = [];
 
@@ -61,6 +79,9 @@ export class ArdourXMLSerializer {
     }
     if (binding.note !== undefined) {
       attributes.push(`note="${binding.note}"`);
+    }
+    if (binding['enc-r'] !== undefined) {
+      attributes.push(`enc-r="${binding['enc-r']}"`);
     }
     if (binding.rpn !== undefined) {
       attributes.push(`rpn="${binding.rpn}"`);
@@ -75,7 +96,12 @@ export class ArdourXMLSerializer {
       attributes.push(`nrpn-14="${binding.nrpn14}"`);
     }
 
-    attributes.push(`function="${this.escapeXML(binding.function)}"`);
+    if (binding.function) {
+      attributes.push(`function="${this.escapeXML(binding.function)}"`);
+    }
+    if (binding.uri) {
+      attributes.push(`uri="${this.escapeXML(binding.uri)}"`);
+    }
 
     if (binding.action) {
       attributes.push(`action="${this.escapeXML(binding.action)}"`);

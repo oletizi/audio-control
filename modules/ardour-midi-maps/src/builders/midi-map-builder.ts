@@ -1,13 +1,15 @@
-import type { ArdourBinding, ArdourMidiMap, ArdourFunction } from '../types/ardour.js';
+import type { ArdourBinding, ArdourMidiMap, ArdourFunction, ArdourDeviceInfo } from '../types/ardour.js';
 
 export interface MidiMapBuilderOptions {
   name: string;
   version?: string;
+  deviceInfo?: ArdourDeviceInfo;
 }
 
 export interface BindingOptions {
   channel: number;
-  function: string;
+  function?: string;
+  uri?: string;
   action?: string;
   encoder?: boolean;
   momentary?: boolean;
@@ -22,23 +24,30 @@ export interface NoteBindingOptions extends BindingOptions {
   note: number;
 }
 
+export interface EncoderRelativeBindingOptions extends BindingOptions {
+  controller: number;
+}
+
 export class MidiMapBuilder {
   private bindings: ArdourBinding[] = [];
   private readonly name: string;
   private readonly version: string | undefined;
+  private readonly deviceInfo: ArdourDeviceInfo | undefined;
 
   constructor(options: MidiMapBuilderOptions) {
     this.name = options.name;
     this.version = options.version;
+    this.deviceInfo = options.deviceInfo;
   }
 
   addCCBinding(options: CCBindingOptions): this {
     const binding: ArdourBinding = {
       channel: options.channel,
       ctl: options.controller,
-      function: options.function,
     };
 
+    if (options.function !== undefined) binding.function = options.function;
+    if (options.uri !== undefined) binding.uri = options.uri;
     if (options.action !== undefined) binding.action = options.action;
     if (options.encoder) binding.encoder = 'yes';
     if (options.momentary) binding.momentary = 'yes';
@@ -52,11 +61,27 @@ export class MidiMapBuilder {
     const binding: ArdourBinding = {
       channel: options.channel,
       note: options.note,
-      function: options.function,
     };
 
+    if (options.function !== undefined) binding.function = options.function;
+    if (options.uri !== undefined) binding.uri = options.uri;
     if (options.action !== undefined) binding.action = options.action;
     if (options.momentary) binding.momentary = 'yes';
+    if (options.threshold !== undefined) binding.threshold = options.threshold;
+
+    this.bindings.push(binding);
+    return this;
+  }
+
+  addEncoderRelativeBinding(options: EncoderRelativeBindingOptions): this {
+    const binding: ArdourBinding = {
+      channel: options.channel,
+      'enc-r': options.controller,
+    };
+
+    if (options.function !== undefined) binding.function = options.function;
+    if (options.uri !== undefined) binding.uri = options.uri;
+    if (options.action !== undefined) binding.action = options.action;
     if (options.threshold !== undefined) binding.threshold = options.threshold;
 
     this.bindings.push(binding);
@@ -126,6 +151,10 @@ export class MidiMapBuilder {
 
     if (this.version !== undefined) {
       map.version = this.version;
+    }
+
+    if (this.deviceInfo !== undefined) {
+      map.deviceInfo = this.deviceInfo;
     }
 
     return map;
