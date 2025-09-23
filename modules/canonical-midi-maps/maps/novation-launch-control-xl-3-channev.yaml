@@ -405,27 +405,6 @@ mappings:
     mapping:
       scaling: "exponential"
 
-  - id: "eq_low_pass"
-    description: "EQ Low Pass Filter"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 17
-      behavior:
-        mode: "absolute"
-        curve: "exponential"
-    pluginTarget:
-      type: "parameter"
-      identifier: "20"
-      name: "EQ Low Pass"
-      range:
-        min: 5000.0
-        max: 20000.0
-        default: 12000.0
-      units: "Hz"
-      category: "EQ"
-    mapping:
-      scaling: "exponential"
 
   - id: "eq_high_freq"
     description: "EQ High Frequency"
@@ -571,6 +550,25 @@ mappings:
         max: 20.0
         default: 0.0
       units: "dB"
+      category: "Compressor"
+
+  - id: "comp_dry_wet"
+    description: "Compressor Dry/Wet Mix"
+    midiInput:
+      type: "cc"
+      channel: 1
+      number: 17
+      behavior:
+        mode: "absolute"
+        curve: "linear"
+    pluginTarget:
+      type: "parameter"
+      identifier: "25"
+      name: "Comp Dry/Wet"
+      range:
+        min: 0.0
+        max: 1.0
+        default: 1.0
       category: "Compressor"
 
   - id: "comp_enable"
