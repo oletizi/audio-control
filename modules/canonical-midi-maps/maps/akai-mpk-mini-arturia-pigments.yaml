@@ -1,0 +1,244 @@
+metadata:
+  name: "Akai MPK Mini MK3 → Arturia Pigments"
+  version: "1.0.0"
+  description: "Compact mapping for controlling Arturia Pigments with Akai MPK Mini MK3"
+  author: "Audio Control Team"
+  created: "2024-01-15"
+  tags:
+    - "synthesizer"
+    - "akai"
+    - "arturia"
+    - "mpk-mini"
+    - "pigments"
+
+controller:
+  manufacturer: "Akai"
+  model: "MPK Mini MK3"
+  description: "Compact 25-key controller with 8 knobs and 8 pads"
+  midiChannel: 1
+  notes: "Optimized for limited control surface"
+
+plugin:
+  manufacturer: "Arturia"
+  name: "Pigments"
+  version: "4.0"
+  format: "VST3"
+  description: "Wavetable and virtual analog synthesizer"
+
+mappings:
+  # Engine A Controls (Knobs 1-4)
+  - id: "engine_a_wavetable"
+    description: "Engine A Wavetable Position"
+    midiInput:
+      type: "cc"
+      channel: 1
+      number: 70
+      behavior:
+        mode: "absolute"
+    pluginTarget:
+      type: "parameter"
+      identifier: "ENGINE_A_WAVETABLE"
+      name: "Engine A Wavetable"
+      range:
+        min: 0.0
+        max: 1.0
+      category: "Engine A"
+
+  - id: "engine_a_morph"
+    description: "Engine A Morph"
+    midiInput:
+      type: "cc"
+      channel: 1
+      number: 71
+      behavior:
+        mode: "absolute"
+    pluginTarget:
+      type: "parameter"
+      identifier: "ENGINE_A_MORPH"
+      name: "Engine A Morph"
+      range:
+        min: 0.0
+        max: 1.0
+      category: "Engine A"
+
+  - id: "engine_a_level"
+    description: "Engine A Level"
+    midiInput:
+      type: "cc"
+      channel: 1
+      number: 72
+      behavior:
+        mode: "absolute"
+    pluginTarget:
+      type: "parameter"
+      identifier: "ENGINE_A_LEVEL"
+      name: "Engine A Level"
+      range:
+        min: 0.0
+        max: 1.0
+      category: "Engine A"
+
+  - id: "engine_a_pan"
+    description: "Engine A Pan"
+    midiInput:
+      type: "cc"
+      channel: 1
+      number: 73
+      behavior:
+        mode: "absolute"
+    pluginTarget:
+      type: "parameter"
+      identifier: "ENGINE_A_PAN"
+      name: "Engine A Pan"
+      range:
+        min: -1.0
+        max: 1.0
+        default: 0.0
+      category: "Engine A"
+    mapping:
+      bipolar: true
+
+  # Filter Controls (Knobs 5-8)
+  - id: "filter_cutoff"
+    description: "Filter Cutoff"
+    midiInput:
+      type: "cc"
+      channel: 1
+      number: 74
+      behavior:
+        mode: "absolute"
+        curve: "exponential"
+    pluginTarget:
+      type: "parameter"
+      identifier: "FILTER_CUTOFF"
+      name: "Filter Cutoff"
+      range:
+        min: 20.0
+        max: 20000.0
+        default: 1000.0
+      units: "Hz"
+      category: "Filter"
+    mapping:
+      scaling: "exponential"
+
+  - id: "filter_resonance"
+    description: "Filter Resonance"
+    midiInput:
+      type: "cc"
+      channel: 1
+      number: 75
+      behavior:
+        mode: "absolute"
+    pluginTarget:
+      type: "parameter"
+      identifier: "FILTER_RESONANCE"
+      name: "Filter Resonance"
+      range:
+        min: 0.0
+        max: 1.0
+      category: "Filter"
+
+  - id: "envelope_amount"
+    description: "Filter Envelope Amount"
+    midiInput:
+      type: "cc"
+      channel: 1
+      number: 76
+      behavior:
+        mode: "absolute"
+    pluginTarget:
+      type: "parameter"
+      identifier: "FILTER_ENV_AMOUNT"
+      name: "Filter Env Amount"
+      range:
+        min: -1.0
+        max: 1.0
+        default: 0.0
+      category: "Filter"
+    mapping:
+      bipolar: true
+
+  - id: "lfo_rate"
+    description: "LFO Rate"
+    midiInput:
+      type: "cc"
+      channel: 1
+      number: 77
+      behavior:
+        mode: "absolute"
+        curve: "exponential"
+    pluginTarget:
+      type: "parameter"
+      identifier: "LFO1_RATE"
+      name: "LFO 1 Rate"
+      range:
+        min: 0.01
+        max: 100.0
+        default: 1.0
+      units: "Hz"
+      category: "Modulation"
+    mapping:
+      scaling: "exponential"
+
+  # Pad Controls for Performance
+  - id: "sequence_play"
+    description: "Start/Stop Sequencer"
+    midiInput:
+      type: "note"
+      channel: 10
+      number: 36
+      behavior:
+        mode: "toggle"
+    pluginTarget:
+      type: "parameter"
+      identifier: "SEQ_PLAY_STOP"
+      name: "Sequencer Play"
+      category: "Sequencer"
+
+  - id: "sequence_record"
+    description: "Sequencer Record"
+    midiInput:
+      type: "note"
+      channel: 10
+      number: 37
+      behavior:
+        mode: "toggle"
+    pluginTarget:
+      type: "parameter"
+      identifier: "SEQ_RECORD"
+      name: "Sequencer Record"
+      category: "Sequencer"
+
+  - id: "macro_1"
+    description: "Macro Control 1"
+    midiInput:
+      type: "note"
+      channel: 10
+      number: 38
+      behavior:
+        mode: "momentary"
+    pluginTarget:
+      type: "macro"
+      identifier: "MACRO_1"
+      name: "Macro 1"
+      range:
+        min: 0.0
+        max: 1.0
+      category: "Macros"
+
+  - id: "macro_2"
+    description: "Macro Control 2"
+    midiInput:
+      type: "note"
+      channel: 10
+      number: 39
+      behavior:
+        mode: "momentary"
+    pluginTarget:
+      type: "macro"
+      identifier: "MACRO_2"
+      name: "Macro 2"
+      range:
+        min: 0.0
+        max: 1.0
+      category: "Macros"
