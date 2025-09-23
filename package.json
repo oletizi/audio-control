@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "pnpm -r build",
+    "install": "pnpm build && pnpm generate:ardour:install",
     "clean": "pnpm -r clean",
     "dev": "pnpm -r dev",
     "test": "pnpm -r test",

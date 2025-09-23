@@ -182,11 +182,12 @@ function findCanonicalMaps(mapsDir: string): string[] {
 }
 
 /**
- * Generate Ardour filename from canonical map
+ * Generate Ardour filename from controller info
  */
-function generateArdourFilename(canonicalPath: string): string {
-  const baseName = basename(canonicalPath, extname(canonicalPath));
-  return `${baseName}.map`;
+function generateArdourFilename(controller: any): string {
+  const manufacturer = controller.manufacturer.toLowerCase().replace(/\s+/g, '-');
+  const model = controller.model.toLowerCase().replace(/\s+/g, '-');
+  return `${manufacturer}-${model}.map`;
 }
 
 /**
@@ -210,38 +211,116 @@ async function generateArdourMaps(install: boolean = false): Promise<void> {
   });
   console.log();
 
+  // Group maps by controller
+  const controllerGroups = new Map<string, any[]>();
+
+  for (const canonicalPath of canonicalMaps) {
+    try {
+      const yamlContent = readFileSync(canonicalPath, 'utf8');
+      const { map, validation } = CanonicalMapParser.parseFromYAML(yamlContent);
+
+      if (!validation.valid || !map) {
+        console.error(`❌ Invalid canonical map: ${basename(canonicalPath)}`);
+        continue;
+      }
+
+      // Create controller key
+      const controllerKey = `${map.controller.manufacturer}-${map.controller.model}`;
+
+      if (!controllerGroups.has(controllerKey)) {
+        controllerGroups.set(controllerKey, []);
+      }
+
+      controllerGroups.get(controllerKey)!.push({
+        path: canonicalPath,
+        map: map
+      });
+
+    } catch (error) {
+      console.error(`❌ Failed to parse ${basename(canonicalPath)}: ${error}`);
+    }
+  }
+
+  console.log(`\\nGrouped into ${controllerGroups.size} controller(s):`);
+  controllerGroups.forEach((maps, controller) => {
+    console.log(`  - ${controller}: ${maps.length} plugin mapping(s)`);
+  });
+  console.log();
+
   // Prepare output directory
   const outputDir = join(process.cwd(), 'dist', 'ardour-maps');
   if (!existsSync(outputDir)) {
     mkdirSync(outputDir, { recursive: true });
   }
 
-  // Convert each map
+  // Generate one Ardour map per controller
   const results: ConversionResult[] = [];
 
-  for (const canonicalPath of canonicalMaps) {
-    const ardourFilename = generateArdourFilename(canonicalPath);
-    const outputPath = join(outputDir, ardourFilename);
-
+  for (const [controllerKey, mapGroup] of controllerGroups) {
     try {
-      console.log(`Converting: ${basename(canonicalPath)} → ${ardourFilename}`);
+      console.log(`Generating Ardour map for: ${controllerKey}`);
 
-      const ardourXML = convertCanonicalToArdour(canonicalPath);
+      // Use the first map's controller info for the builder
+      const firstMap = mapGroup[0].map;
+      const ardourFilename = generateArdourFilename(firstMap.controller);
+      const outputPath = join(outputDir, ardourFilename);
+
+      // Create consolidated Ardour map with ALL mappings from this controller
+      const ardourBuilder = new MidiMapBuilder({
+        name: `${firstMap.controller.manufacturer} ${firstMap.controller.model}`,
+        version: '1.0.0',
+      });
+
+      let totalMappings = 0;
+
+      // Add ALL mappings from ALL plugins for this controller
+      for (const { map, path } of mapGroup) {
+        console.log(`  + Adding mappings from ${basename(path)} (${map.mappings.length} mappings)`);
+
+        for (const mapping of map.mappings) {
+          const channel = mapping.midiInput.channel || 1;
+          const ardourFunction = convertToArdourFunction(mapping);
+
+          if (mapping.midiInput.type === 'cc') {
+            ardourBuilder.addCCBinding({
+              channel,
+              controller: mapping.midiInput.number || 0,
+              function: ardourFunction,
+              encoder: mapping.midiInput.behavior?.mode === 'relative',
+              momentary: false,
+            });
+          } else if (mapping.midiInput.type === 'note') {
+            ardourBuilder.addNoteBinding({
+              channel,
+              note: mapping.midiInput.number || 0,
+              function: ardourFunction,
+              momentary: mapping.midiInput.behavior?.mode === 'momentary',
+            });
+          }
+          totalMappings++;
+        }
+      }
+
+      // Generate XML
+      const ardourMap = ardourBuilder.build();
+      const serializer = new ArdourXMLSerializer();
+      const ardourXML = serializer.serializeMidiMap(ardourMap);
+
       writeFileSync(outputPath, ardourXML);
 
       results.push({
-        canonical: basename(canonicalPath),
+        canonical: `${mapGroup.length} plugin maps`,
         ardour: ardourFilename,
         success: true,
       });
 
-      console.log(`  ✓ Generated: ${outputPath}`);
+      console.log(`  ✓ Generated: ${ardourFilename} (${totalMappings} total mappings)`);
 
     } catch (error) {
-      console.error(`  ❌ Failed: ${error}`);
+      console.error(`  ❌ Failed to generate ${controllerKey}: ${error}`);
       results.push({
-        canonical: basename(canonicalPath),
-        ardour: ardourFilename,
+        canonical: controllerKey,
+        ardour: `${controllerKey}.map`,
         success: false,
         error: error instanceof Error ? error.message : String(error),
       });
