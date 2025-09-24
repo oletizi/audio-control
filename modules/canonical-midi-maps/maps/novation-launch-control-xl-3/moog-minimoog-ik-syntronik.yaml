@@ -1,0 +1,455 @@
+version: 1.0.0
+device:
+  manufacturer: Novation
+  model: Launch Control XL 3
+  firmware: ">=1.0"
+metadata:
+  name: IK Multimedia Syntronik Moog Mapping
+  description: MIDI CC mapping for IK Multimedia Syntronik Moog collection
+  author: Audio Control System
+  date: 2025-09-23
+  tags:
+    - synthesizer
+    - minimoog
+    - moog
+    - syntronik
+    - ik-multimedia
+
+plugin:
+  manufacturer: IK Multimedia
+  name: Syntronik (Moog Models)
+  type: VST/AU/AAX
+  version: ">=1.0"
+
+controls:
+  # Top Row - Filter & Oscillator Controls (Encoders 1-8)
+  - id: encoder_1
+    name: VCF Cutoff
+    type: encoder
+    cc: 13
+    channel: global
+    range: [0, 127]
+    description: VCF cutoff frequency
+    plugin_parameter: VCF_Cutoff
+
+  - id: encoder_2
+    name: HPF
+    type: encoder
+    cc: 14
+    channel: global
+    range: [0, 127]
+    description: High-pass filter
+    plugin_parameter: HPF
+
+  - id: encoder_3
+    name: Glide
+    type: encoder
+    cc: 15
+    channel: global
+    range: [0, 127]
+    description: Portamento time
+    plugin_parameter: Glide
+
+  - id: encoder_4
+    name: Osc 1 Octave
+    type: encoder
+    cc: 16
+    channel: global
+    range: [0, 127]
+    description: Oscillator 1 octave range
+    plugin_parameter: OSC1_Octave
+
+  - id: encoder_5
+    name: Osc 1 Wave
+    type: encoder
+    cc: 17
+    channel: global
+    range: [0, 127]
+    description: Oscillator 1 waveform mix
+    plugin_parameter: OSC1_Wave
+
+  - id: encoder_6
+    name: Mod Amount
+    type: encoder
+    cc: 18
+    channel: global
+    range: [0, 127]
+    description: Modulation wheel routing
+    plugin_parameter: Mod_Amount
+
+  - id: encoder_7
+    name: Drive
+    type: encoder
+    cc: 19
+    channel: global
+    range: [0, 127]
+    description: Output drive/saturation
+    plugin_parameter: Drive
+
+  - id: encoder_8
+    name: Character
+    type: encoder
+    cc: 45
+    channel: global
+    range: [0, 127]
+    description: Vintage character control
+    plugin_parameter: Character
+
+  # Middle Row - Filter & Modulation (Encoders 9-16)
+  - id: encoder_9
+    name: Resonance
+    type: encoder
+    cc: 21
+    channel: global
+    range: [0, 127]
+    description: VCF resonance/emphasis
+    plugin_parameter: VCF_Resonance
+
+  - id: encoder_10
+    name: LFO Rate
+    type: encoder
+    cc: 22
+    channel: global
+    range: [0, 127]
+    description: LFO frequency
+    plugin_parameter: LFO_Rate
+
+  - id: encoder_11
+    name: Osc 2 Detune
+    type: encoder
+    cc: 23
+    channel: global
+    range: [0, 127]
+    description: Oscillator 2 detune
+    plugin_parameter: OSC2_Detune
+
+  - id: encoder_12
+    name: Osc 2 Octave
+    type: encoder
+    cc: 24
+    channel: global
+    range: [0, 127]
+    description: Oscillator 2 octave range
+    plugin_parameter: OSC2_Octave
+
+  - id: encoder_13
+    name: Osc 2 Wave
+    type: encoder
+    cc: 25
+    channel: global
+    range: [0, 127]
+    description: Oscillator 2 waveform mix
+    plugin_parameter: OSC2_Wave
+
+  - id: encoder_14
+    name: Key Follow
+    type: encoder
+    cc: 26
+    channel: global
+    range: [0, 127]
+    description: Filter keyboard tracking
+    plugin_parameter: Key_Follow
+
+  - id: encoder_15
+    name: Velocity
+    type: encoder
+    cc: 27
+    channel: global
+    range: [0, 127]
+    description: Velocity sensitivity
+    plugin_parameter: Velocity
+
+  - id: encoder_16
+    name: Filter Type
+    type: encoder
+    cc: 28
+    channel: global
+    range: [0, 127]
+    description: Filter type selector
+    plugin_parameter: Filter_Type
+
+  # Third Row - Oscillator 3 & Effects (Encoders 17-24)
+  - id: encoder_17
+    name: Filter Env
+    type: encoder
+    cc: 29
+    channel: global
+    range: [0, 127]
+    description: Filter envelope amount
+    plugin_parameter: Filter_Env
+
+  - id: encoder_18
+    name: LFO Delay
+    type: encoder
+    cc: 30
+    channel: global
+    range: [0, 127]
+    description: LFO delay time
+    plugin_parameter: LFO_Delay
+
+  - id: encoder_19
+    name: Osc 3 Detune
+    type: encoder
+    cc: 31
+    channel: global
+    range: [0, 127]
+    description: Oscillator 3 detune
+    plugin_parameter: OSC3_Detune
+
+  - id: encoder_20
+    name: Osc 3 Octave
+    type: encoder
+    cc: 61
+    channel: global
+    range: [0, 127]
+    description: Oscillator 3 octave range
+    plugin_parameter: OSC3_Octave
+
+  - id: encoder_21
+    name: Osc 3 Wave
+    type: encoder
+    cc: 33
+    channel: global
+    range: [0, 127]
+    description: Oscillator 3 waveform mix
+    plugin_parameter: OSC3_Wave
+
+  - id: encoder_22
+    name: Chorus Rate
+    type: encoder
+    cc: 34
+    channel: global
+    range: [0, 127]
+    description: Chorus effect rate
+    plugin_parameter: Chorus_Rate
+
+  - id: encoder_23
+    name: Delay Time
+    type: encoder
+    cc: 35
+    channel: global
+    range: [0, 127]
+    description: Delay time
+    plugin_parameter: Delay_Time
+
+  - id: encoder_24
+    name: Reverb Size
+    type: encoder
+    cc: 36
+    channel: global
+    range: [0, 127]
+    description: Reverb room size
+    plugin_parameter: Reverb_Size
+
+  # Sliders - ADSR & Mixer
+  - id: slider_1
+    name: Attack
+    type: slider
+    cc: 53
+    channel: global
+    range: [0, 127]
+    description: Filter envelope attack
+    plugin_parameter: Filter_Attack
+
+  - id: slider_2
+    name: Decay
+    type: slider
+    cc: 54
+    channel: global
+    range: [0, 127]
+    description: Filter envelope decay
+    plugin_parameter: Filter_Decay
+
+  - id: slider_3
+    name: Sustain
+    type: slider
+    cc: 55
+    channel: global
+    range: [0, 127]
+    description: Filter envelope sustain
+    plugin_parameter: Filter_Sustain
+
+  - id: slider_4
+    name: Osc 1 Level
+    type: slider
+    cc: 56
+    channel: global
+    range: [0, 127]
+    description: Oscillator 1 mixer level
+    plugin_parameter: OSC1_Level
+
+  - id: slider_5
+    name: Osc 2 Level
+    type: slider
+    cc: 57
+    channel: global
+    range: [0, 127]
+    description: Oscillator 2 mixer level
+    plugin_parameter: OSC2_Level
+
+  - id: slider_6
+    name: Osc 3 Level
+    type: slider
+    cc: 58
+    channel: global
+    range: [0, 127]
+    description: Oscillator 3 mixer level
+    plugin_parameter: OSC3_Level
+
+  - id: slider_7
+    name: Noise Level
+    type: slider
+    cc: 59
+    channel: global
+    range: [0, 127]
+    description: Noise generator level
+    plugin_parameter: Noise_Level
+
+  - id: slider_8
+    name: Master Level
+    type: slider
+    cc: 60
+    channel: global
+    range: [0, 127]
+    description: Master output level
+    plugin_parameter: Master_Level
+
+  # Buttons - Model Selection & Effects
+  - id: button_row_1
+    name: Model & Performance
+    type: button_group
+    buttons:
+      - id: button_1
+        name: Minimoog Model
+        cc: 37
+        channel: global
+        mode: toggle
+        plugin_parameter: Model_Minimoog
+      - id: button_2
+        name: Modular Model
+        cc: 37
+        channel: global
+        mode: toggle
+        plugin_parameter: Model_Modular
+      - id: button_3
+        name: Taurus Model
+        cc: 37
+        channel: global
+        mode: toggle
+        plugin_parameter: Model_Taurus
+      - id: button_4
+        name: Source Model
+        cc: 37
+        channel: global
+        mode: toggle
+        plugin_parameter: Model_Source
+      - id: button_5
+        name: Arp On
+        cc: 41
+        channel: global
+        mode: toggle
+        plugin_parameter: Arp_On
+      - id: button_6
+        name: Hold
+        cc: 41
+        channel: global
+        mode: toggle
+        plugin_parameter: Hold
+      - id: button_7
+        name: Mono Mode
+        cc: 41
+        channel: global
+        mode: toggle
+        plugin_parameter: Mono_Mode
+      - id: button_8
+        name: Legato
+        cc: 41
+        channel: global
+        mode: toggle
+        plugin_parameter: Legato
+
+  - id: button_row_2
+    name: Effects & Voice Modes
+    type: button_group
+    buttons:
+      - id: button_9
+        name: Chorus On
+        cc: 45
+        channel: global
+        mode: toggle
+        plugin_parameter: Chorus_On
+      - id: button_10
+        name: Delay On
+        cc: 45
+        channel: global
+        mode: toggle
+        plugin_parameter: Delay_On
+      - id: button_11
+        name: Reverb On
+        cc: 45
+        channel: global
+        mode: toggle
+        plugin_parameter: Reverb_On
+      - id: button_12
+        name: Unison
+        cc: 45
+        channel: global
+        mode: toggle
+        plugin_parameter: Unison
+      - id: button_13
+        name: Filter LP/HP
+        cc: 49
+        channel: global
+        mode: toggle
+        plugin_parameter: Filter_LP_HP
+      - id: button_14
+        name: Env Polarity
+        cc: 50
+        channel: global
+        mode: toggle
+        plugin_parameter: Env_Polarity
+      - id: button_15
+        name: Vintage On
+        cc: 51
+        channel: global
+        mode: toggle
+        plugin_parameter: Vintage_On
+      - id: button_16
+        name: Drift On
+        cc: 52
+        channel: global
+        mode: toggle
+        plugin_parameter: Drift_On
+
+notes: |
+  IK Multimedia Syntronik Moog collection mapping for Novation Launch Control XL 3
+
+  This mapping is designed for IK Multimedia's Syntronik, which includes
+  multiple classic Moog synthesizer models in one plugin.
+
+  Supported Models:
+  - Minimoog Model D: Classic monophonic bass/lead synthesizer
+  - Moog Modular: Large modular synthesizer systems
+  - Taurus: Bass pedal synthesizer
+  - Source: Rare polyphonic Moog synthesizer
+
+  Key features:
+  - Model selection buttons for switching between Moog types
+  - Classic 3-oscillator + noise architecture
+  - Moog-style 24dB lowpass filter with resonance
+  - Built-in effects: chorus, delay, reverb
+  - Vintage modes with drift and character controls
+  - Extended polyphony on supported models
+
+  Syntronik enhancements:
+  - High-quality sampling combined with modeling
+  - Extended polyphony where historically monophonic
+  - Modern effects processing
+  - Vintage drift and character modeling
+  - Multiple filter types beyond classic lowpass
+
+  The plugin_parameter fields correspond to IK Multimedia's
+  Syntronik parameter naming scheme.
+
+  Note: Parameter availability may vary depending on the selected
+  Moog model within Syntronik.

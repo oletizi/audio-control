@@ -1,0 +1,450 @@
+version: 1.0.0
+device:
+  manufacturer: Novation
+  model: Launch Control XL 3
+  firmware: ">=1.0"
+metadata:
+  name: TAL-BassLine-101 Mapping
+  description: MIDI CC mapping for TAL-BassLine-101 (TB-303 inspired) using Moog template layout
+  author: Audio Control System
+  date: 2025-09-23
+  tags:
+    - synthesizer
+    - tb-303
+    - tal-bassline
+    - acid
+    - bass
+
+plugin:
+  manufacturer: TAL Software
+  name: TAL-BassLine-101
+  type: VST/AU
+  version: ">=1.0"
+
+controls:
+  # Top Row - Filter & Oscillator Controls (Encoders 1-8)
+  - id: encoder_1
+    name: Cutoff Freq
+    type: encoder
+    cc: 13
+    channel: global
+    range: [0, 127]
+    description: VCF cutoff frequency
+    plugin_parameter: Cutoff
+
+  - id: encoder_2
+    name: HPF
+    type: encoder
+    cc: 14
+    channel: global
+    range: [0, 127]
+    description: High-pass filter
+    plugin_parameter: HPF
+
+  - id: encoder_3
+    name: Glide
+    type: encoder
+    cc: 15
+    channel: global
+    range: [0, 127]
+    description: Portamento time
+    plugin_parameter: Glide
+
+  - id: encoder_4
+    name: VCO Range
+    type: encoder
+    cc: 16
+    channel: global
+    range: [0, 127]
+    description: VCO octave range
+    plugin_parameter: VCO_Range
+
+  - id: encoder_5
+    name: VCO Waveform
+    type: encoder
+    cc: 17
+    channel: global
+    range: [0, 127]
+    description: VCO waveform (saw/square)
+    plugin_parameter: VCO_Wave
+
+  - id: encoder_6
+    name: Sub Level
+    type: encoder
+    cc: 18
+    channel: global
+    range: [0, 127]
+    description: Sub oscillator level
+    plugin_parameter: Sub_Level
+
+  - id: encoder_7
+    name: Drive
+    type: encoder
+    cc: 19
+    channel: global
+    range: [0, 127]
+    description: Saturation/overdrive amount
+    plugin_parameter: Drive
+
+  - id: encoder_8
+    name: Vintage
+    type: encoder
+    cc: 45
+    channel: global
+    range: [0, 127]
+    description: Vintage mode intensity
+    plugin_parameter: Vintage
+
+  # Middle Row - Filter & Modulation (Encoders 9-16)
+  - id: encoder_9
+    name: Resonance
+    type: encoder
+    cc: 21
+    channel: global
+    range: [0, 127]
+    description: VCF resonance
+    plugin_parameter: Resonance
+
+  - id: encoder_10
+    name: LFO Rate
+    type: encoder
+    cc: 22
+    channel: global
+    range: [0, 127]
+    description: LFO frequency
+    plugin_parameter: LFO_Rate
+
+  - id: encoder_11
+    name: VCO Tune
+    type: encoder
+    cc: 23
+    channel: global
+    range: [0, 127]
+    description: VCO fine tune
+    plugin_parameter: VCO_Tune
+
+  - id: encoder_12
+    name: Pulse Width
+    type: encoder
+    cc: 24
+    channel: global
+    range: [0, 127]
+    description: Square wave pulse width
+    plugin_parameter: PulseWidth
+
+  - id: encoder_13
+    name: VCO Mod
+    type: encoder
+    cc: 25
+    channel: global
+    range: [0, 127]
+    description: VCO modulation amount
+    plugin_parameter: VCO_Mod
+
+  - id: encoder_14
+    name: Accent
+    type: encoder
+    cc: 26
+    channel: global
+    range: [0, 127]
+    description: Accent amount
+    plugin_parameter: Accent
+
+  - id: encoder_15
+    name: Slide Time
+    type: encoder
+    cc: 27
+    channel: global
+    range: [0, 127]
+    description: Slide/glide time
+    plugin_parameter: Slide_Time
+
+  - id: encoder_16
+    name: Pattern Length
+    type: encoder
+    cc: 28
+    channel: global
+    range: [0, 127]
+    description: Sequencer pattern length
+    plugin_parameter: Pattern_Length
+
+  # Third Row - Envelope & Advanced Controls (Encoders 17-24)
+  - id: encoder_17
+    name: Env Mod
+    type: encoder
+    cc: 29
+    channel: global
+    range: [0, 127]
+    description: Envelope modulation amount
+    plugin_parameter: Env_Mod
+
+  - id: encoder_18
+    name: LFO Delay
+    type: encoder
+    cc: 30
+    channel: global
+    range: [0, 127]
+    description: LFO delay time
+    plugin_parameter: LFO_Delay
+
+  - id: encoder_19
+    name: Distortion
+    type: encoder
+    cc: 31
+    channel: global
+    range: [0, 127]
+    description: Distortion amount
+    plugin_parameter: Distortion
+
+  - id: encoder_20
+    name: Reverb Mix
+    type: encoder
+    cc: 61
+    channel: global
+    range: [0, 127]
+    description: Reverb send level
+    plugin_parameter: Reverb_Mix
+
+  - id: encoder_21
+    name: Delay Mix
+    type: encoder
+    cc: 33
+    channel: global
+    range: [0, 127]
+    description: Delay send level
+    plugin_parameter: Delay_Mix
+
+  - id: encoder_22
+    name: Delay Time
+    type: encoder
+    cc: 34
+    channel: global
+    range: [0, 127]
+    description: Delay time
+    plugin_parameter: Delay_Time
+
+  - id: encoder_23
+    name: Delay Feedback
+    type: encoder
+    cc: 35
+    channel: global
+    range: [0, 127]
+    description: Delay feedback amount
+    plugin_parameter: Delay_Feedback
+
+  - id: encoder_24
+    name: Pan
+    type: encoder
+    cc: 36
+    channel: global
+    range: [0, 127]
+    description: Stereo panning
+    plugin_parameter: Pan
+
+  # Sliders - Envelope & Levels (TB-303 style)
+  - id: slider_1
+    name: Attack
+    type: slider
+    cc: 53
+    channel: global
+    range: [0, 127]
+    description: VCF envelope attack
+    plugin_parameter: Attack
+
+  - id: slider_2
+    name: Decay
+    type: slider
+    cc: 54
+    channel: global
+    range: [0, 127]
+    description: VCF envelope decay
+    plugin_parameter: Decay
+
+  - id: slider_3
+    name: Sustain
+    type: slider
+    cc: 55
+    channel: global
+    range: [0, 127]
+    description: VCF envelope sustain
+    plugin_parameter: Sustain
+
+  - id: slider_4
+    name: VCO Level
+    type: slider
+    cc: 56
+    channel: global
+    range: [0, 127]
+    description: VCO output level
+    plugin_parameter: VCO_Level
+
+  - id: slider_5
+    name: LFO Amount
+    type: slider
+    cc: 57
+    channel: global
+    range: [0, 127]
+    description: LFO modulation depth
+    plugin_parameter: LFO_Amount
+
+  - id: slider_6
+    name: Filter Mix
+    type: slider
+    cc: 58
+    channel: global
+    range: [0, 127]
+    description: Filter bypass/mix
+    plugin_parameter: Filter_Mix
+
+  - id: slider_7
+    name: Compressor
+    type: slider
+    cc: 59
+    channel: global
+    range: [0, 127]
+    description: Built-in compressor
+    plugin_parameter: Compressor
+
+  - id: slider_8
+    name: Volume
+    type: slider
+    cc: 60
+    channel: global
+    range: [0, 127]
+    description: Master volume
+    plugin_parameter: Volume
+
+  # Buttons - Pattern & Performance Controls
+  - id: button_row_1
+    name: Sequencer Controls
+    type: button_group
+    buttons:
+      - id: button_1
+        name: Seq Play
+        cc: 37
+        channel: global
+        mode: toggle
+        plugin_parameter: Seq_Play
+      - id: button_2
+        name: Seq Stop
+        cc: 37
+        channel: global
+        mode: momentary
+        plugin_parameter: Seq_Stop
+      - id: button_3
+        name: Seq Record
+        cc: 37
+        channel: global
+        mode: toggle
+        plugin_parameter: Seq_Record
+      - id: button_4
+        name: Seq Clear
+        cc: 37
+        channel: global
+        mode: momentary
+        plugin_parameter: Seq_Clear
+      - id: button_5
+        name: Transpose Up
+        cc: 41
+        channel: global
+        mode: momentary
+        plugin_parameter: Transpose_Up
+      - id: button_6
+        name: Transpose Down
+        cc: 41
+        channel: global
+        mode: momentary
+        plugin_parameter: Transpose_Down
+      - id: button_7
+        name: Pattern A
+        cc: 41
+        channel: global
+        mode: toggle
+        plugin_parameter: Pattern_A
+      - id: button_8
+        name: Pattern B
+        cc: 41
+        channel: global
+        mode: toggle
+        plugin_parameter: Pattern_B
+
+  - id: button_row_2
+    name: Performance Controls
+    type: button_group
+    buttons:
+      - id: button_9
+        name: Mono Mode
+        cc: 45
+        channel: global
+        mode: toggle
+        plugin_parameter: Mono_Mode
+      - id: button_10
+        name: Legato
+        cc: 45
+        channel: global
+        mode: toggle
+        plugin_parameter: Legato
+      - id: button_11
+        name: Random
+        cc: 45
+        channel: global
+        mode: toggle
+        plugin_parameter: Random
+      - id: button_12
+        name: Hold
+        cc: 45
+        channel: global
+        mode: toggle
+        plugin_parameter: Hold
+      - id: button_13
+        name: LP/HP Filter
+        cc: 49
+        channel: global
+        mode: toggle
+        plugin_parameter: Filter_Type
+      - id: button_14
+        name: Env Invert
+        cc: 50
+        channel: global
+        mode: toggle
+        plugin_parameter: Env_Invert
+      - id: button_15
+        name: Sync Mode
+        cc: 51
+        channel: global
+        mode: toggle
+        plugin_parameter: Sync_Mode
+      - id: button_16
+        name: Overdrive
+        cc: 52
+        channel: global
+        mode: toggle
+        plugin_parameter: Overdrive
+
+notes: |
+  TAL-BassLine-101 mapping for Novation Launch Control XL 3
+
+  This mapping adapts the TB-303 inspired TAL-BassLine-101 to the Moog
+  template structure, providing comprehensive control over the classic
+  acid bass synthesizer emulation.
+
+  Key features:
+  - Classic TB-303 architecture with VCO, VCF, and VCA
+  - Built-in step sequencer with pattern controls
+  - Slide and accent functions for authentic acid basslines
+  - Distortion and overdrive for aggressive sounds
+  - Built-in effects: reverb, delay, compressor
+  - Pattern transpose and randomization
+
+  TB-303 specific features:
+  - Saw and square waveforms with pulse width control
+  - Envelope modulation of filter cutoff
+  - Slide (glide) between notes
+  - Accent for velocity-sensitive filter modulation
+  - 16-step sequencer with A/B patterns
+
+  The plugin_parameter fields correspond to TAL-BassLine-101's
+  automation parameter names.
+
+  Note: While inspired by TB-303, this plugin includes modern
+  enhancements like polyphonic mode, effects, and extended controls.
