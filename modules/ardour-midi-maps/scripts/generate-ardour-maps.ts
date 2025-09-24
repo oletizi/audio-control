@@ -17,10 +17,25 @@ import { CanonicalMapParser } from '../../canonical-midi-maps/src/index.js';
 import { MidiMapBuilder, ArdourXMLSerializer } from '../src/index.js';
 
 interface ConversionResult {
-  canonical: string;
+  device: string;
   ardour: string;
   success: boolean;
   error?: string;
+  pluginCount?: number;
+  totalMappings?: number;
+}
+
+interface DeviceGroup {
+  manufacturer: string;
+  model: string;
+  templates: ParsedTemplate[];
+}
+
+interface ParsedTemplate {
+  filePath: string;
+  fileName: string;
+  map: any;
+  assignedChannel: number;
 }
 
 /**
@@ -146,20 +161,154 @@ function findCanonicalTemplates(mapsDir: string): string[] {
 }
 
 /**
- * Generate Ardour filename from device info
+ * Generate device-specific Ardour filename
  */
-function generateArdourFilename(device: any, mapName: string): string {
-  const manufacturer = device.manufacturer.toLowerCase().replace(/\\s+/g, '-');
-  const model = device.model.toLowerCase().replace(/\\s+/g, '-');
-  const safeName = mapName.toLowerCase().replace(/\\s+/g, '-').replace(/[^a-z0-9-]/g, '');
-  return `${manufacturer}-${model}-${safeName}.map`;
+function generateDeviceFilename(manufacturer: string, model: string): string {
+  const cleanManufacturer = manufacturer.toLowerCase().replace(/\\s+/g, '-');
+  const cleanModel = model.toLowerCase().replace(/\\s+/g, '-');
+  return `${cleanManufacturer}-${cleanModel}.map`;
+}
+
+/**
+ * Parse all templates and group by device, assigning MIDI channels
+ */
+async function parseAndGroupTemplates(templatePaths: string[]): Promise<DeviceGroup[]> {
+  const deviceMap = new Map<string, DeviceGroup>();
+
+  for (const templatePath of templatePaths) {
+    try {
+      const yamlContent = readFileSync(templatePath, 'utf8');
+      const { map, validation } = CanonicalMapParser.parseFromYAML(yamlContent);
+
+      if (!validation.valid || !map) {
+        console.error(`❌ Skipping invalid template ${basename(templatePath)}: ${validation.errors.map(e => e.message).join(', ')}`);
+        continue;
+      }
+
+      const deviceKey = `${map.device.manufacturer}|${map.device.model}`;
+
+      if (!deviceMap.has(deviceKey)) {
+        deviceMap.set(deviceKey, {
+          manufacturer: map.device.manufacturer,
+          model: map.device.model,
+          templates: [],
+        });
+      }
+
+      const deviceGroup = deviceMap.get(deviceKey)!;
+
+      // Assign MIDI channel: use explicit channel from template, or auto-assign
+      const assignedChannel = map.midi_channel || (deviceGroup.templates.length + 1);
+
+      // Validate channel doesn't exceed MIDI limit
+      if (assignedChannel > 16) {
+        console.error(`❌ Skipping template ${basename(templatePath)}: Channel ${assignedChannel} exceeds MIDI limit (16)`);
+        continue;
+      }
+
+      deviceGroup.templates.push({
+        filePath: templatePath,
+        fileName: basename(templatePath),
+        map,
+        assignedChannel,
+      });
+
+    } catch (error) {
+      console.error(`❌ Error parsing template ${basename(templatePath)}: ${error}`);
+    }
+  }
+
+  return Array.from(deviceMap.values());
+}
+
+/**
+ * Create consolidated Ardour map from device group
+ */
+async function createConsolidatedMap(deviceGroup: DeviceGroup): Promise<any> {
+  // Use first template's device info for base configuration
+  const firstTemplate = deviceGroup.templates[0];
+  const device = firstTemplate.map.device;
+
+  // Create consolidated map name
+  const mapName = `${device.manufacturer} ${device.model}`;
+
+  // Add DeviceInfo for controllers with multiple channels/faders
+  let deviceInfo: any = undefined;
+  if (device.model.toLowerCase().includes('launch control xl')) {
+    deviceInfo = {
+      'device-name': mapName,
+      'device-info': {
+        'bank-size': 8, // 8 fader banks on Launch Control XL
+      }
+    };
+  }
+
+  const ardourBuilder = new MidiMapBuilder({
+    name: mapName,
+    version: firstTemplate.map.version,
+    deviceInfo: deviceInfo,
+  });
+
+  // Add mappings from all templates using their assigned channels
+  for (const template of deviceGroup.templates) {
+    const map = template.map;
+    const midiChannel = template.assignedChannel;
+
+    console.log(`    Adding ${map.plugin ? map.plugin.name : map.metadata.name} mappings to channel ${midiChannel}`);
+
+    // Convert controls to Ardour bindings
+    for (const control of map.controls) {
+      // Handle regular controls (encoders, sliders, buttons)
+      if (control.type !== 'button_group' && control.cc !== undefined) {
+        const ardourBinding = convertControlToArdourBinding(control);
+
+        if (control.type === 'button') {
+          ardourBuilder.addNoteBinding({
+            channel: midiChannel,
+            note: control.cc,
+            function: ardourBinding.function,
+            uri: ardourBinding.uri,
+            momentary: control.mode === 'momentary',
+          });
+        } else {
+          ardourBuilder.addCCBinding({
+            channel: midiChannel,
+            controller: control.cc,
+            function: ardourBinding.function,
+            uri: ardourBinding.uri,
+            encoder: control.type === 'encoder',
+            momentary: false,
+          });
+        }
+      }
+
+      // Handle button groups
+      if (control.type === 'button_group' && control.buttons) {
+        for (const button of control.buttons) {
+          const ardourBinding = button.plugin_parameter ?
+            { uri: `/route/plugin/parameter S1 1 ${button.plugin_parameter}` } :
+            getGenericArdourBinding({ name: button.name, type: 'button' });
+
+          ardourBuilder.addNoteBinding({
+            channel: midiChannel,
+            note: button.cc,
+            function: ardourBinding.function,
+            uri: ardourBinding.uri,
+            momentary: button.mode === 'momentary',
+          });
+        }
+      }
+    }
+  }
+
+  return ardourBuilder.build();
 }
 
 /**
  * Main conversion function
  */
 async function generateArdourMaps(install: boolean = false): Promise<void> {
-  console.log('🎛️  Generating Ardour MIDI Maps from Canonical Templates\\n');
+  console.log('🎛️  Generating Consolidated Ardour MIDI Maps from Canonical Templates\\n');
 
   // Find canonical templates
   const __filename = fileURLToPath(import.meta.url);
@@ -178,129 +327,67 @@ async function generateArdourMaps(install: boolean = false): Promise<void> {
   });
   console.log();
 
+  // Parse all templates and group by device
+  const deviceGroups = await parseAndGroupTemplates(canonicalTemplates);
+
+  if (deviceGroups.length === 0) {
+    console.log('No valid templates found after parsing');
+    return;
+  }
+
+  console.log(`\\nGrouped into ${deviceGroups.length} device(s):`);
+  deviceGroups.forEach(group => {
+    console.log(`  📱 ${group.manufacturer} ${group.model}: ${group.templates.length} plugin mappings`);
+    group.templates.forEach(template => {
+      console.log(`    - Ch.${template.assignedChannel}: ${template.fileName}`);
+    });
+  });
+  console.log();
+
   // Prepare output directory
   const outputDir = join(process.cwd(), 'dist', 'ardour-maps');
   if (!existsSync(outputDir)) {
     mkdirSync(outputDir, { recursive: true });
   }
 
-  // Convert each template
+  // Generate consolidated maps
   const results: ConversionResult[] = [];
 
-  for (const templatePath of canonicalTemplates) {
+  for (const deviceGroup of deviceGroups) {
     try {
-      console.log(`Converting: ${basename(templatePath)}`);
+      const deviceName = `${deviceGroup.manufacturer} ${deviceGroup.model}`;
+      console.log(`\\n🔧 Generating consolidated map for: ${deviceName}`);
 
-      const yamlContent = readFileSync(templatePath, 'utf8');
-      const { map, validation } = CanonicalMapParser.parseFromYAML(yamlContent);
-
-      if (!validation.valid || !map) {
-        console.error(`❌ Invalid template: ${validation.errors.map(e => e.message).join(', ')}`);
-        results.push({
-          canonical: basename(templatePath),
-          ardour: '',
-          success: false,
-          error: validation.errors.map(e => e.message).join(', '),
-        });
-        continue;
-      }
-
-      // Create Ardour map name
-      const mapName = map.plugin ?
-        `${map.device.manufacturer} ${map.device.model} for ${map.plugin.name}` :
-        `${map.device.manufacturer} ${map.device.model} - ${map.metadata.name}`;
-
-      const ardourFilename = generateArdourFilename(map.device, map.metadata.name);
+      const ardourFilename = generateDeviceFilename(deviceGroup.manufacturer, deviceGroup.model);
       const outputPath = join(outputDir, ardourFilename);
 
-      // Add DeviceInfo for controllers with multiple channels/faders
-      let deviceInfo: any = undefined;
-      if (map.device.model.toLowerCase().includes('launch control xl')) {
-        deviceInfo = {
-          'device-name': `${map.device.manufacturer} ${map.device.model}`,
-          'device-info': {
-            'bank-size': 8, // 8 fader banks on Launch Control XL
-          }
-        };
-      }
-
-      const ardourBuilder = new MidiMapBuilder({
-        name: mapName,
-        version: map.version,
-        deviceInfo: deviceInfo,
-      });
-
-      let totalMappings = 0;
-
-      // Convert controls to Ardour bindings
-      for (const control of map.controls) {
-        // Handle regular controls (encoders, sliders, buttons)
-        if (control.type !== 'button_group' && control.cc !== undefined) {
-          const channel = typeof control.channel === 'string' && control.channel === 'global' ? 1 :
-                          typeof control.channel === 'number' ? control.channel : 1;
-          const ardourBinding = convertControlToArdourBinding(control);
-
-          if (control.type === 'button') {
-            ardourBuilder.addNoteBinding({
-              channel,
-              note: control.cc,
-              function: ardourBinding.function,
-              uri: ardourBinding.uri,
-              momentary: control.mode === 'momentary',
-            });
-          } else {
-            ardourBuilder.addCCBinding({
-              channel,
-              controller: control.cc,
-              function: ardourBinding.function,
-              uri: ardourBinding.uri,
-              encoder: control.type === 'encoder',
-              momentary: false,
-            });
-          }
-          totalMappings++;
-        }
-
-        // Handle button groups
-        if (control.type === 'button_group' && control.buttons) {
-          for (const button of control.buttons) {
-            const channel = typeof button.channel === 'string' && button.channel === 'global' ? 1 :
-                            typeof button.channel === 'number' ? button.channel : 1;
-            const ardourBinding = button.plugin_parameter ?
-              { uri: `/route/plugin/parameter S1 1 ${button.plugin_parameter}` } :
-              getGenericArdourBinding({ name: button.name, type: 'button' });
-
-            ardourBuilder.addNoteBinding({
-              channel,
-              note: button.cc,
-              function: ardourBinding.function,
-              uri: ardourBinding.uri,
-              momentary: button.mode === 'momentary',
-            });
-            totalMappings++;
-          }
-        }
-      }
+      // Create consolidated map
+      const consolidatedMap = await createConsolidatedMap(deviceGroup);
 
       // Generate XML
-      const ardourMap = ardourBuilder.build();
       const serializer = new ArdourXMLSerializer();
-      const ardourXML = serializer.serializeMidiMap(ardourMap);
+      const ardourXML = serializer.serializeMidiMap(consolidatedMap);
 
       writeFileSync(outputPath, ardourXML);
 
+      const totalMappings = consolidatedMap.bindings.length;
+
       results.push({
-        canonical: basename(templatePath),
+        device: deviceName,
         ardour: ardourFilename,
         success: true,
+        pluginCount: deviceGroup.templates.length,
+        totalMappings,
       });
 
-      console.log(`  ✓ Generated: ${ardourFilename} (${totalMappings} mappings)`);
+      console.log(`  ✅ Generated: ${ardourFilename}`);
+      console.log(`     Plugins: ${deviceGroup.templates.length}, Total mappings: ${totalMappings}`);
 
     } catch (error) {
-      console.error(`  ❌ Failed to convert ${basename(templatePath)}: ${error}`);
+      const deviceName = `${deviceGroup.manufacturer} ${deviceGroup.model}`;
+      console.error(`  ❌ Failed to generate consolidated map for ${deviceName}: ${error}`);
       results.push({
-        canonical: basename(templatePath),
+        device: deviceName,
         ardour: '',
         success: false,
         error: error instanceof Error ? error.message : String(error),

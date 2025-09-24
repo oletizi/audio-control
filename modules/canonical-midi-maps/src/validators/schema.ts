@@ -14,6 +14,7 @@ const InputBehaviorSchema = z.object({
   invert: z.boolean().optional(),
 });
 
+// Legacy schemas - kept for backwards compatibility during migration
 const MappingBehaviorSchema = z.object({
   scaling: z.enum(['linear', 'exponential', 'logarithmic', 'custom']).optional(),
   curve: z.array(z.number()).optional(),
@@ -38,6 +39,9 @@ const PluginTargetDefinitionSchema = z.object({
   units: z.string().optional(),
   category: z.string().optional(),
 });
+
+// Export legacy schemas for potential migration scripts
+export { MappingBehaviorSchema, MidiInputDefinitionSchema, PluginTargetDefinitionSchema };
 
 const ButtonDefinitionSchema = z.object({
   id: z.string(),
@@ -89,6 +93,7 @@ export const CanonicalMidiMapSchema = z.object({
   device: DeviceDefinitionSchema,
   metadata: MapMetadataSchema,
   plugin: PluginDefinitionSchema.optional(),
+  midi_channel: z.number().min(1).max(16).optional(),
   controls: z.array(ControlDefinitionSchema),
 });
 

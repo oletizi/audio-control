@@ -3,6 +3,7 @@ export interface CanonicalMidiMap {
   device: DeviceDefinition;
   metadata: MapMetadata;
   plugin?: PluginDefinition;
+  midi_channel?: number;
   controls: ControlDefinition[];
 }
 
