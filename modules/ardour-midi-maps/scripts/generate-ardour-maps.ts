@@ -13,6 +13,7 @@ import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, statSy
 import { join, basename, extname, dirname } from 'path';
 import { homedir } from 'os';
 import { fileURLToPath } from 'url';
+// Import removed - will use CanonicalMapParser for YAML parsing
 import { CanonicalMapParser } from '../../canonical-midi-maps/src/index.js';
 import { MidiMapBuilder, ArdourXMLSerializer } from '../src/index.js';
 
@@ -36,6 +37,16 @@ interface ParsedTemplate {
   fileName: string;
   map: any;
   assignedChannel: number;
+}
+
+interface MidiChannelRegistry {
+  channels: Record<string, {
+    plugin: string;
+    description: string;
+    manufacturer: string;
+    type: string;
+  }>;
+  available_channels: number[];
 }
 
 /**
@@ -148,8 +159,10 @@ function findCanonicalTemplates(mapsDir: string): string[] {
       if (stat.isDirectory()) {
         scanDirectory(fullPath);
       } else if (extname(item) === '.yaml' || extname(item) === '.yml') {
-        // Skip README and process documentation files
-        if (!item.toLowerCase().includes('readme') && !item.toLowerCase().includes('process')) {
+        // Skip README, process documentation files, and registry files
+        if (!item.toLowerCase().includes('readme') &&
+            !item.toLowerCase().includes('process') &&
+            !item.toLowerCase().includes('midi-channel-registry')) {
           templates.push(fullPath);
         }
       }
@@ -158,6 +171,79 @@ function findCanonicalTemplates(mapsDir: string): string[] {
 
   scanDirectory(mapsDir);
   return templates;
+}
+
+/**
+ * Load MIDI channel registry for a device directory
+ */
+function loadMidiChannelRegistry(deviceDir: string): MidiChannelRegistry | null {
+  const registryPath = join(deviceDir, 'midi-channel-registry.yaml');
+
+  if (!existsSync(registryPath)) {
+    console.warn(`No MIDI channel registry found at: ${registryPath}`);
+    return null;
+  }
+
+  try {
+    const registryContent = readFileSync(registryPath, 'utf8');
+
+    // Extract channels mapping from YAML content
+    // Simple approach: parse the channels section manually
+    const channels: Record<string, any> = {};
+
+    const lines = registryContent.split('\n');
+    let inChannelsSection = false;
+    let currentChannel: string | null = null;
+    let currentChannelData: any = null;
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+
+      if (trimmed === 'channels:') {
+        inChannelsSection = true;
+        continue;
+      }
+
+      if (inChannelsSection) {
+        // Check if we've left the channels section (no more indentation)
+        if (trimmed && !line.startsWith('  ')) {
+          break;
+        }
+
+        // Channel number (e.g., "  1:")
+        if (line.match(/^  \d+:$/)) {
+          if (currentChannel && currentChannelData) {
+            channels[currentChannel] = currentChannelData;
+          }
+          currentChannel = trimmed.replace(':', '');
+          currentChannelData = {};
+        }
+
+        // Channel properties (e.g., "    plugin: analog-obsession-channev")
+        if (line.match(/^    \w+:/)) {
+          if (currentChannelData) {
+            const [key, value] = trimmed.split(':', 2);
+            currentChannelData[key] = value.trim().replace(/^["']|["']$/g, ''); // Remove quotes
+          }
+        }
+      }
+    }
+
+    // Don't forget the last channel
+    if (currentChannel && currentChannelData) {
+      channels[currentChannel] = currentChannelData;
+    }
+
+    if (Object.keys(channels).length === 0) {
+      console.error(`No channels found in registry: ${registryPath}`);
+      return null;
+    }
+
+    return { channels, available_channels: [] } as MidiChannelRegistry;
+  } catch (error) {
+    console.error(`Failed to load registry from ${registryPath}: ${error}`);
+    return null;
+  }
 }
 
 /**
@@ -170,10 +256,11 @@ function generateDeviceFilename(manufacturer: string, model: string): string {
 }
 
 /**
- * Parse all templates and group by device, assigning MIDI channels
+ * Parse all templates and group by device, using registry for MIDI channel assignment
  */
 async function parseAndGroupTemplates(templatePaths: string[]): Promise<DeviceGroup[]> {
   const deviceMap = new Map<string, DeviceGroup>();
+  const deviceRegistries = new Map<string, MidiChannelRegistry>();
 
   for (const templatePath of templatePaths) {
     try {
@@ -186,6 +273,7 @@ async function parseAndGroupTemplates(templatePaths: string[]): Promise<DeviceGr
       }
 
       const deviceKey = `${map.device.manufacturer}|${map.device.model}`;
+      const deviceDir = dirname(templatePath);
 
       if (!deviceMap.has(deviceKey)) {
         deviceMap.set(deviceKey, {
@@ -197,8 +285,49 @@ async function parseAndGroupTemplates(templatePaths: string[]): Promise<DeviceGr
 
       const deviceGroup = deviceMap.get(deviceKey)!;
 
-      // Assign MIDI channel: use explicit channel from template, or auto-assign
-      const assignedChannel = map.midi_channel || (deviceGroup.templates.length + 1);
+      // Load registry for this device if not already loaded
+      if (!deviceRegistries.has(deviceKey)) {
+        const registry = loadMidiChannelRegistry(deviceDir);
+        if (registry) {
+          deviceRegistries.set(deviceKey, registry);
+        }
+      }
+
+      // Determine MIDI channel assignment
+      let assignedChannel: number;
+
+      if (map.midi_channel_registry) {
+        // Use registry to look up channel assignment
+        const registry = deviceRegistries.get(deviceKey);
+        if (registry) {
+          // Extract plugin filename (without .yaml extension) from template path
+          const pluginFilename = basename(templatePath, '.yaml');
+
+          // Find the channel assigned to this plugin in the registry
+          const channelEntry = Object.entries(registry.channels).find(
+            ([channel, info]) => info.plugin === pluginFilename
+          );
+
+          if (channelEntry) {
+            assignedChannel = parseInt(channelEntry[0]);
+            console.log(`    Found registry assignment: ${pluginFilename} → Channel ${assignedChannel}`);
+          } else {
+            console.error(`❌ Plugin ${pluginFilename} not found in registry. Available: ${Object.values(registry.channels).map(c => c.plugin).join(', ')}`);
+            continue;
+          }
+        } else {
+          console.error(`❌ Registry reference found but no registry loaded for ${basename(templatePath)}`);
+          continue;
+        }
+      } else if (map.midi_channel) {
+        // Use explicit channel from template (legacy support)
+        assignedChannel = map.midi_channel;
+        console.log(`    Using explicit channel assignment: ${map.midi_channel}`);
+      } else {
+        // Fallback to auto-assignment (deprecated)
+        assignedChannel = deviceGroup.templates.length + 1;
+        console.warn(`    ⚠️  Using deprecated auto-assignment: Channel ${assignedChannel}. Consider adding to registry.`);
+      }
 
       // Validate channel doesn't exceed MIDI limit
       if (assignedChannel > 16) {

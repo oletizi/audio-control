@@ -22,6 +22,9 @@ plugin:
   version: ">=1.0"
   descriptor: plugin-descriptors/tal-togu-audio-line-tal-j-8.json
 
+# Reference to centralized MIDI channel registry for this device
+midi_channel_registry: midi-channel-registry.yaml
+
 controls:
   # Top Row - Main Synthesis Controls (Encoders 1-8)
   - id: encoder_1

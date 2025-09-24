@@ -21,6 +21,9 @@ plugin:
   type: VST/AU/AAX
   version: ">=4.0"
 
+# Reference to centralized MIDI channel registry for this device
+midi_channel_registry: midi-channel-registry.yaml
+
 controls:
   # Top Row - Main Synthesis Controls (Encoders 1-8)
   - id: encoder_1

@@ -18,6 +18,9 @@ metadata:
 # This is a base template - plugin-specific implementations should inherit these CC assignments
 # and map plugin_parameter fields to their specific plugin parameters
 
+# Reference to centralized MIDI channel registry for this device
+midi_channel_registry: midi-channel-registry.yaml
+
 controls:
   # Top Row - Main Synthesis Controls (Encoders 1-8)
   # CC 13-19, 41 from Novation Components template

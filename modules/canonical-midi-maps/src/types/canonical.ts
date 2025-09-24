@@ -4,6 +4,7 @@ export interface CanonicalMidiMap {
   metadata: MapMetadata;
   plugin?: PluginDefinition;
   midi_channel?: number;
+  midi_channel_registry?: string; // Path to registry file
   controls: ControlDefinition[];
 }
 
