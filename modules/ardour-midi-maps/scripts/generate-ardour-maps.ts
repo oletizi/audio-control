@@ -177,10 +177,17 @@ function findCanonicalTemplates(mapsDir: string): string[] {
  * Load MIDI channel registry for a device directory
  */
 function loadMidiChannelRegistry(deviceDir: string): MidiChannelRegistry | null {
-  const registryPath = join(deviceDir, 'midi-channel-registry.yaml');
+  // Try current directory first
+  let registryPath = join(deviceDir, 'midi-channel-registry.yaml');
+
+  // If not found, try parent directory (for subdirectory organization)
+  if (!existsSync(registryPath)) {
+    const parentDir = dirname(deviceDir);
+    registryPath = join(parentDir, 'midi-channel-registry.yaml');
+  }
 
   if (!existsSync(registryPath)) {
-    console.warn(`No MIDI channel registry found at: ${registryPath}`);
+    console.warn(`No MIDI channel registry found at: ${registryPath} or parent directory`);
     return null;
   }
 
@@ -300,19 +307,36 @@ async function parseAndGroupTemplates(templatePaths: string[]): Promise<DeviceGr
         // Use registry to look up channel assignment
         const registry = deviceRegistries.get(deviceKey);
         if (registry) {
-          // Extract plugin filename (without .yaml extension) from template path
+          // Extract relative path from template path (subdirectory/filename without .yaml)
+          const templateDir = dirname(templatePath);
+          const parentDir = dirname(templateDir);
           const pluginFilename = basename(templatePath, '.yaml');
+
+          // Create relative path like "roland-jupiter-8/tal-j8"
+          let relativePath: string;
+          if (templateDir === parentDir || basename(templateDir) === basename(parentDir)) {
+            // File is in the main directory
+            relativePath = pluginFilename;
+          } else {
+            // File is in a subdirectory
+            const subdirectory = basename(templateDir);
+            relativePath = `${subdirectory}/${pluginFilename}`;
+          }
 
           // Find the channel assigned to this plugin in the registry
           const channelEntry = Object.entries(registry.channels).find(
-            ([channel, info]) => info.plugin === pluginFilename
+            ([channel, info]) => {
+              // Support both old 'plugin' field and new 'path' field
+              return info.path === relativePath || info.plugin === pluginFilename;
+            }
           );
 
           if (channelEntry) {
             assignedChannel = parseInt(channelEntry[0]);
-            console.log(`    Found registry assignment: ${pluginFilename} → Channel ${assignedChannel}`);
+            console.log(`    Found registry assignment: ${relativePath} → Channel ${assignedChannel}`);
           } else {
-            console.error(`❌ Plugin ${pluginFilename} not found in registry. Available: ${Object.values(registry.channels).map(c => c.plugin).join(', ')}`);
+            const available = Object.values(registry.channels).map(c => c.path || c.plugin).join(', ');
+            console.error(`❌ Plugin ${relativePath} not found in registry. Available: ${available}`);
             continue;
           }
         } else {

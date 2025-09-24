@@ -23,7 +23,7 @@ plugin:
   version: ">=1.0"
 
 # Reference to centralized MIDI channel registry for this device
-midi_channel_registry: midi-channel-registry.yaml
+midi_channel_registry: ../midi-channel-registry.yaml
 
 controls:
   # Top Row - Preamp & High Pass (Encoders 1-8)
