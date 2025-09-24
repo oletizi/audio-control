@@ -246,6 +246,7 @@ function loadMidiChannelRegistry(deviceDir: string): MidiChannelRegistry | null 
       return null;
     }
 
+    console.log(`✓ Registry loaded with ${Object.keys(channels).length} channels:`, Object.keys(channels));
     return { channels, available_channels: [] } as MidiChannelRegistry;
   } catch (error) {
     console.error(`Failed to load registry from ${registryPath}: ${error}`);
@@ -303,6 +304,8 @@ async function parseAndGroupTemplates(templatePaths: string[]): Promise<DeviceGr
       // Determine MIDI channel assignment
       let assignedChannel: number;
 
+      console.log(`  Processing ${basename(templatePath)}: midi_channel_registry=${map.midi_channel_registry}, midi_channel=${map.midi_channel}`);
+
       if (map.midi_channel_registry) {
         // Use registry to look up channel assignment
         const registry = deviceRegistries.get(deviceKey);
@@ -324,16 +327,21 @@ async function parseAndGroupTemplates(templatePaths: string[]): Promise<DeviceGr
           }
 
           // Find the channel assigned to this plugin in the registry
+          console.log(`    Looking for registry entry: "${relativePath}"`);
+          console.log(`    Registry channels:`, Object.entries(registry.channels).map(([ch, info]) => `${ch}:${info.path || info.plugin}`));
+
           const channelEntry = Object.entries(registry.channels).find(
             ([channel, info]) => {
               // Support both old 'plugin' field and new 'path' field
-              return info.path === relativePath || info.plugin === pluginFilename;
+              const match = info.path === relativePath || info.plugin === pluginFilename;
+              console.log(`    Checking channel ${channel}: ${info.path || info.plugin} === ${relativePath}? ${match}`);
+              return match;
             }
           );
 
           if (channelEntry) {
             assignedChannel = parseInt(channelEntry[0]);
-            console.log(`    Found registry assignment: ${relativePath} → Channel ${assignedChannel}`);
+            console.log(`    ✓ Found registry assignment: ${relativePath} → Channel ${assignedChannel}`);
           } else {
             const available = Object.values(registry.channels).map(c => c.path || c.plugin).join(', ');
             console.error(`❌ Plugin ${relativePath} not found in registry. Available: ${available}`);

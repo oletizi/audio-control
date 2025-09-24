@@ -94,6 +94,7 @@ export const CanonicalMidiMapSchema = z.object({
   metadata: MapMetadataSchema,
   plugin: PluginDefinitionSchema.optional(),
   midi_channel: z.number().min(1).max(16).optional(),
+  midi_channel_registry: z.string().optional(),
   controls: z.array(ControlDefinitionSchema),
 });
 
