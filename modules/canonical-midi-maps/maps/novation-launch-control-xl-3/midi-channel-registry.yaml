@@ -17,7 +17,7 @@ metadata:
 # MIDI Channel Assignments (1-16 available)
 # Format: channel_number: plugin-mapping-filename (without .yaml extension)
 channels:
-  1:
+  4:
     path: channel-strips/analog-obsession-channev
     description: "Analog Obsession CHANNEV - Channel strip plugin"
     manufacturer: "Analog Obsession"
@@ -35,7 +35,7 @@ channels:
     manufacturer: "Generic"
     type: "Template"
 
-  4:
+  1:
     path: roland-jupiter-8/tal-j8
     description: "TAL-J-8 - Jupiter-8 emulation with analog character"
     manufacturer: "TAL Software"
