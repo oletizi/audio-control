@@ -30,7 +30,7 @@ controls:
     channel: global
     range: [0, 127]
     description: VCF cutoff frequency
-    plugin_parameter: Filter.Cutoff
+    plugin_parameter: "104"
 
   - id: encoder_2
     name: HPF Cutoff
@@ -39,7 +39,7 @@ controls:
     channel: global
     range: [0, 127]
     description: High-pass filter cutoff
-    plugin_parameter: Filter.HPF
+    plugin_parameter: "102"
 
   - id: encoder_3
     name: Portamento
@@ -48,7 +48,7 @@ controls:
     channel: global
     range: [0, 127]
     description: Portamento/glide time
-    plugin_parameter: Portamento.Time
+    plugin_parameter: "10"
 
   - id: encoder_4
     name: PWM Amount
@@ -57,7 +57,7 @@ controls:
     channel: global
     range: [0, 127]
     description: Pulse width modulation amount
-    plugin_parameter: OSC1.PWM
+    plugin_parameter: "58"
 
   - id: encoder_5
     name: Cross Mod
@@ -66,7 +66,7 @@ controls:
     channel: global
     range: [0, 127]
     description: Cross modulation amount
-    plugin_parameter: CrossMod
+    plugin_parameter: "86"
 
   - id: encoder_6
     name: Noise Level
@@ -75,7 +75,7 @@ controls:
     channel: global
     range: [0, 127]
     description: Noise generator level
-    plugin_parameter: Mixer.Noise
+    plugin_parameter: "90"
 
   - id: encoder_7
     name: Chorus Mix
@@ -103,7 +103,7 @@ controls:
     channel: global
     range: [0, 127]
     description: VCF resonance/emphasis
-    plugin_parameter: Filter.Resonance
+    plugin_parameter: "106"
 
   - id: encoder_10
     name: LFO Rate
@@ -112,7 +112,7 @@ controls:
     channel: global
     range: [0, 127]
     description: LFO 1 frequency/rate
-    plugin_parameter: LFO1.Rate
+    plugin_parameter: "42"
 
   - id: encoder_11
     name: Osc 1 Range
@@ -176,7 +176,7 @@ controls:
     channel: global
     range: [0, 127]
     description: Envelope amount to filter
-    plugin_parameter: Filter.EnvAmount
+    plugin_parameter: "110"
 
   - id: encoder_18
     name: LFO Delay
@@ -249,7 +249,7 @@ controls:
     channel: global
     range: [0, 127]
     description: VCF envelope attack time
-    plugin_parameter: ENV.Attack
+    plugin_parameter: "64"
 
   - id: slider_2
     name: Decay
@@ -258,7 +258,7 @@ controls:
     channel: global
     range: [0, 127]
     description: VCF envelope decay time
-    plugin_parameter: ENV.Decay
+    plugin_parameter: "66"
 
   - id: slider_3
     name: Sustain
@@ -267,7 +267,7 @@ controls:
     channel: global
     range: [0, 127]
     description: VCF envelope sustain level
-    plugin_parameter: ENV.Sustain
+    plugin_parameter: "68"
 
   - id: slider_4
     name: Release
@@ -276,7 +276,7 @@ controls:
     channel: global
     range: [0, 127]
     description: VCF envelope release time
-    plugin_parameter: ENV.Release
+    plugin_parameter: "70"
 
   - id: slider_5
     name: Osc Mix
@@ -285,7 +285,7 @@ controls:
     channel: global
     range: [0, 127]
     description: Oscillator 1/2 mix balance
-    plugin_parameter: Mixer.OscBalance
+    plugin_parameter: "84"
 
   - id: slider_6
     name: LFO Filter
@@ -312,7 +312,7 @@ controls:
     channel: global
     range: [0, 127]
     description: Master output volume
-    plugin_parameter: Master.Volume
+    plugin_parameter: "0"
 
   # Buttons - Mode Selection & Features
   - id: button_row_1
