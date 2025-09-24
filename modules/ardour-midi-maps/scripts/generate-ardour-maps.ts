@@ -257,8 +257,10 @@ async function createConsolidatedMap(deviceGroup: DeviceGroup): Promise<any> {
 
     console.log(`    Adding ${pluginName} mappings to channel ${midiChannel}`);
 
-    // Add channel comment to builder
-    ardourBuilder.addChannelComment(midiChannel, pluginName);
+    // Add channel comment to builder with manufacturer
+    const manufacturerName = map.plugin ? map.plugin.manufacturer : 'Generic';
+    const commentText = map.plugin ? `${manufacturerName} ${pluginName}` : pluginName;
+    ardourBuilder.addChannelComment(midiChannel, commentText);
 
     // Convert controls to Ardour bindings
     for (const control of map.controls) {
