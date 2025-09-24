@@ -128,25 +128,27 @@ export class CanonicalMapParser {
   private static generateWarnings(map: CanonicalMidiMapOutput): Array<{ path: string; message: string; code: string }> {
     const warnings: Array<{ path: string; message: string; code: string }> = [];
 
-    // Check for duplicate MIDI inputs
-    const midiInputs = new Map<string, string[]>();
-    map.mappings.forEach((mapping) => {
-      const key = `${mapping.midiInput.type}-${mapping.midiInput.channel || 1}-${mapping.midiInput.number || 0}`;
-      if (!midiInputs.has(key)) {
-        midiInputs.set(key, []);
-      }
-      const existingMappings = midiInputs.get(key);
-      if (existingMappings) {
-        existingMappings.push(mapping.id);
+    // Check for duplicate CC numbers
+    const ccNumbers = new Map<string, string[]>();
+    map.controls.forEach((control) => {
+      if (control.cc !== undefined) {
+        const key = `cc-${control.channel || 'global'}-${control.cc}`;
+        if (!ccNumbers.has(key)) {
+          ccNumbers.set(key, []);
+        }
+        const existingControls = ccNumbers.get(key);
+        if (existingControls) {
+          existingControls.push(control.id);
+        }
       }
     });
 
-    midiInputs.forEach((mappingIds, key) => {
-      if (mappingIds.length > 1) {
+    ccNumbers.forEach((controlIds, key) => {
+      if (controlIds.length > 1) {
         warnings.push({
-          path: 'mappings',
-          message: `Duplicate MIDI input (${key}) used by mappings: ${mappingIds.join(', ')}`,
-          code: 'DUPLICATE_MIDI_INPUT',
+          path: 'controls',
+          message: `Duplicate CC assignment (${key}) used by controls: ${controlIds.join(', ')}`,
+          code: 'DUPLICATE_CC_ASSIGNMENT',
         });
       }
     });

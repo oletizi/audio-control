@@ -1,27 +1,23 @@
 export interface CanonicalMidiMap {
+  version: string;
+  device: DeviceDefinition;
   metadata: MapMetadata;
-  controller: ControllerDefinition;
-  plugin: PluginDefinition;
-  mappings: MidiMapping[];
+  plugin?: PluginDefinition;
+  controls: ControlDefinition[];
 }
 
 export interface MapMetadata {
   name: string;
-  version: string;
   description?: string;
   author?: string;
-  created?: string;
-  updated?: string;
+  date?: string;
   tags?: string[];
 }
 
-export interface ControllerDefinition {
+export interface DeviceDefinition {
   manufacturer: string;
   model: string;
-  version?: string;
-  description?: string;
-  midiChannel?: number;
-  notes?: string;
+  firmware?: string;
 }
 
 export interface PluginDefinition {
@@ -33,7 +29,30 @@ export interface PluginDefinition {
   notes?: string;
 }
 
-export interface MidiMapping {
+export interface ControlDefinition {
+  id: string;
+  name: string;
+  type: 'encoder' | 'slider' | 'button' | 'button_group';
+  cc?: number;
+  channel?: string | number;
+  range?: number[];
+  description?: string;
+  mode?: 'toggle' | 'momentary';
+  plugin_parameter?: string;
+  buttons?: ButtonDefinition[];
+}
+
+export interface ButtonDefinition {
+  id: string;
+  name: string;
+  cc: number;
+  channel: string | number;
+  mode: 'toggle' | 'momentary';
+  plugin_parameter?: string;
+}
+
+// Legacy interface for backwards compatibility during migration
+export interface LegacyMidiMapping {
   id: string;
   description?: string;
   midiInput: MidiInputDefinition;

@@ -39,32 +39,40 @@ const PluginTargetDefinitionSchema = z.object({
   category: z.string().optional(),
 });
 
-const MidiMappingSchema = z.object({
+const ButtonDefinitionSchema = z.object({
   id: z.string(),
+  name: z.string(),
+  cc: z.number().min(0).max(127),
+  channel: z.union([z.string(), z.number()]),
+  mode: z.enum(['toggle', 'momentary']),
+  plugin_parameter: z.string().optional(),
+});
+
+const ControlDefinitionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  type: z.enum(['encoder', 'slider', 'button', 'button_group']),
+  cc: z.number().min(0).max(127).optional(),
+  channel: z.union([z.string(), z.number()]).optional(),
+  range: z.array(z.number()).length(2).optional(),
   description: z.string().optional(),
-  midiInput: MidiInputDefinitionSchema,
-  pluginTarget: PluginTargetDefinitionSchema,
-  mapping: MappingBehaviorSchema.optional(),
-  enabled: z.boolean().optional().default(true),
+  mode: z.enum(['toggle', 'momentary']).optional(),
+  plugin_parameter: z.string().optional(),
+  buttons: z.array(ButtonDefinitionSchema).optional(),
 });
 
 const MapMetadataSchema = z.object({
   name: z.string(),
-  version: z.string(),
   description: z.string().optional(),
   author: z.string().optional(),
-  created: z.string().optional(),
-  updated: z.string().optional(),
+  date: z.string().optional(),
   tags: z.array(z.string()).optional(),
 });
 
-const ControllerDefinitionSchema = z.object({
+const DeviceDefinitionSchema = z.object({
   manufacturer: z.string(),
   model: z.string(),
-  version: z.string().optional(),
-  description: z.string().optional(),
-  midiChannel: z.number().min(1).max(16).optional(),
-  notes: z.string().optional(),
+  firmware: z.string().optional(),
 });
 
 const PluginDefinitionSchema = z.object({
@@ -77,10 +85,11 @@ const PluginDefinitionSchema = z.object({
 });
 
 export const CanonicalMidiMapSchema = z.object({
+  version: z.string(),
+  device: DeviceDefinitionSchema,
   metadata: MapMetadataSchema,
-  controller: ControllerDefinitionSchema,
-  plugin: PluginDefinitionSchema,
-  mappings: z.array(MidiMappingSchema),
+  plugin: PluginDefinitionSchema.optional(),
+  controls: z.array(ControlDefinitionSchema),
 });
 
 export type CanonicalMidiMapInput = z.input<typeof CanonicalMidiMapSchema>;

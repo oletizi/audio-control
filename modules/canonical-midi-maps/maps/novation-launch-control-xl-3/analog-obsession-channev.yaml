@@ -1,765 +1,441 @@
+version: 1.0.0
+device:
+  manufacturer: Novation
+  model: Launch Control XL 3
+  firmware: ">=1.0"
 metadata:
-  name: "Novation Launch Control XL 3 → Analog Obsession CHANNEV"
-  version: "1.0.0"
-  description: "Professional channel strip plugin control with Launch Control XL 3's default CC layout"
-  author: "Audio Control Team"
-  created: "2024-01-15"
-  updated: "2024-01-15"
+  name: Analog Obsession CHANNEV Mapping
+  description: Professional channel strip plugin control with Launch Control XL 3's default CC layout
+  author: Audio Control Team
+  date: 2025-09-23
   tags:
-    - "channel-strip"
-    - "novation"
-    - "analog-obsession"
-    - "launch-control-xl-3"
-    - "channev"
-    - "eq"
-    - "compressor"
-    - "preamp"
-
-controller:
-  manufacturer: "Novation"
-  model: "Launch Control XL 3"
-  version: "3.0"
-  description: "Latest generation 8-track controller with knobs, faders, and buttons"
-  midiChannel: 1
-  notes: "Uses default factory CC assignments from Launch Control XL 3 (differs from XL 1 and XL 2)"
+    - channel-strip
+    - analog-obsession
+    - channev
+    - eq
+    - compressor
+    - preamp
 
 plugin:
-  manufacturer: "Analog Obsession"
-  name: "CHANNEV"
-  format: "VST3"
-  description: "Neve-style channel strip with preamp, EQ, compressor, and tape saturation"
-  notes: "Vintage console channel strip emulation"
+  manufacturer: Analog Obsession
+  name: CHANNEV
+  type: VST3
+  version: ">=1.0"
 
-mappings:
-  # Mic Preamp Section
-  - id: "mic_pre_gain"
-    description: "Microphone Preamp Gain"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 5
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "2"
-      name: "Mic Pre Gain"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 0.5
-      units: "dB"
-      category: "Preamp"
+controls:
+  # Top Row - Preamp & High Pass (Encoders 1-8)
+  - id: encoder_1
+    name: High Pass
+    type: encoder
+    cc: 13
+    channel: global
+    range: [0, 127]
+    description: High pass filter frequency (20-500Hz)
+    plugin_parameter: "5"
 
-  - id: "mic_pre_polarity"
-    description: "Microphone Preamp Polarity Switch"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 37
-      behavior:
-        mode: "toggle"
-    pluginTarget:
-      type: "parameter"
-      identifier: "33"
-      name: "Mic Pre Polarity"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 0.0
-      category: "Preamp"
+  - id: encoder_2
+    name: EQ High Pass
+    type: encoder
+    cc: 14
+    channel: global
+    range: [0, 127]
+    description: EQ section high pass frequency
+    plugin_parameter: "19"
 
-  - id: "mic_pre_enable"
-    description: "Microphone Preamp In/Out"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 45
-      behavior:
-        mode: "toggle"
-    pluginTarget:
-      type: "parameter"
-      identifier: "35"
-      name: "Mic Pre In/Out"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 1.0
-      category: "Preamp"
+  - id: encoder_3
+    name: Mic Pre Gain
+    type: encoder
+    cc: 5
+    channel: global
+    range: [0, 127]
+    description: Microphone preamp gain
+    plugin_parameter: "2"
 
-  # Line Amplifier
-  - id: "line_amp"
-    description: "Line Amplifier Gain"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 6
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "10"
-      name: "Line Amp"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 0.5
-      units: "dB"
-      category: "Preamp"
+  - id: encoder_4
+    name: Line Amp
+    type: encoder
+    cc: 6
+    channel: global
+    range: [0, 127]
+    description: Line amplifier gain
+    plugin_parameter: "10"
 
-  # Filter Section
-  - id: "high_shelf"
-    description: "High Frequency Shelf Filter"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 53
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "4"
-      name: "High Shelf"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 0.5
-      units: "dB"
-      category: "Filter"
+  - id: encoder_5
+    name: Comp Dry/Wet
+    type: encoder
+    cc: 17
+    channel: global
+    range: [0, 127]
+    description: Compressor dry/wet mix
+    plugin_parameter: "25"
 
-  - id: "low_shelf"
-    description: "Low Frequency Shelf Filter"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 29
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "3"
-      name: "Low Shelf"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 0.5
-      units: "dB"
-      category: "Filter"
+  - id: encoder_6
+    name: Comp Ratio
+    type: encoder
+    cc: 18
+    channel: global
+    range: [0, 127]
+    description: Compressor ratio (1:1 to 20:1)
+    plugin_parameter: "22"
 
-  - id: "high_pass"
-    description: "High Pass Filter"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 13
-      behavior:
-        mode: "absolute"
-        curve: "exponential"
-    pluginTarget:
-      type: "parameter"
-      identifier: "5"
-      name: "High Pass"
-      range:
-        min: 20.0
-        max: 500.0
-        default: 80.0
-      units: "Hz"
-      category: "Filter"
-    mapping:
-      scaling: "exponential"
+  - id: encoder_7
+    name: Limit Mix
+    type: encoder
+    cc: 19
+    channel: global
+    range: [0, 127]
+    description: Limiter wet/dry mix
+    plugin_parameter: "29"
 
-  # EQ Section
-  - id: "eq_low_freq"
-    description: "EQ Low Frequency"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 22
-      behavior:
-        mode: "absolute"
-        curve: "exponential"
-    pluginTarget:
-      type: "parameter"
-      identifier: "12"
-      name: "EQ Low Freq"
-      range:
-        min: 20.0
-        max: 500.0
-        default: 100.0
-      units: "Hz"
-      category: "EQ"
-    mapping:
-      scaling: "exponential"
+  - id: encoder_8
+    name: Tape Drive
+    type: encoder
+    cc: 20
+    channel: global
+    range: [0, 127]
+    description: Tape saturation drive amount
+    plugin_parameter: "30"
 
-  - id: "eq_low_gain"
-    description: "EQ Low Gain"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 30
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "11"
-      name: "EQ Low Gain"
-      range:
-        min: -15.0
-        max: 15.0
-        default: 0.0
-      units: "dB"
-      category: "EQ"
-    mapping:
-      bipolar: true
+  # Middle Row - EQ Frequencies (Encoders 9-16)
+  - id: encoder_9
+    name: EQ Low Freq
+    type: encoder
+    cc: 22
+    channel: global
+    range: [0, 127]
+    description: EQ low frequency (20-500Hz)
+    plugin_parameter: "12"
 
-  - id: "eq_high_pass_freq"
-    description: "EQ High Pass Frequency"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 14
-      behavior:
-        mode: "absolute"
-        curve: "exponential"
-    pluginTarget:
-      type: "parameter"
-      identifier: "19"
-      name: "EQ High Pass"
-      range:
-        min: 20.0
-        max: 500.0
-        default: 80.0
-      units: "Hz"
-      category: "EQ"
-    mapping:
-      scaling: "exponential"
+  - id: encoder_10
+    name: EQ Low-Mid Freq
+    type: encoder
+    cc: 23
+    channel: global
+    range: [0, 127]
+    description: EQ low-mid frequency (200-2000Hz)
+    plugin_parameter: "14"
 
-  - id: "eq_low_peak"
-    description: "EQ Low Peak/Shelf Switch"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 38
-      behavior:
-        mode: "toggle"
-    pluginTarget:
-      type: "parameter"
-      identifier: "39"
-      name: "EQ Low Peak"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 0.0
-      category: "EQ"
+  - id: encoder_11
+    name: EQ High-Mid Freq
+    type: encoder
+    cc: 24
+    channel: global
+    range: [0, 127]
+    description: EQ high-mid frequency (1-10kHz)
+    plugin_parameter: "16"
 
-  - id: "eq_enable"
-    description: "EQ Section In/Out"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 46
-      behavior:
-        mode: "toggle"
-    pluginTarget:
-      type: "parameter"
-      identifier: "43"
-      name: "EQ In/Out"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 1.0
-      category: "EQ"
+  - id: encoder_12
+    name: EQ High Freq
+    type: encoder
+    cc: 25
+    channel: global
+    range: [0, 127]
+    description: EQ high frequency (5-20kHz)
+    plugin_parameter: "18"
 
-  - id: "eq_low_mid_freq"
-    description: "EQ Low-Mid Frequency"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 23
-      behavior:
-        mode: "absolute"
-        curve: "exponential"
-    pluginTarget:
-      type: "parameter"
-      identifier: "14"
-      name: "EQ Low-Mid Freq"
-      range:
-        min: 200.0
-        max: 2000.0
-        default: 500.0
-      units: "Hz"
-      category: "EQ"
-    mapping:
-      scaling: "exponential"
+  - id: encoder_13
+    name: Comp Release
+    type: encoder
+    cc: 26
+    channel: global
+    range: [0, 127]
+    description: Compressor release time (0.1-5s)
+    plugin_parameter: "23"
 
-  - id: "eq_low_mid_gain"
-    description: "EQ Low-Mid Gain"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 31
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "13"
-      name: "EQ Low-Mid Gain"
-      range:
-        min: -15.0
-        max: 15.0
-        default: 0.0
-      units: "dB"
-      category: "EQ"
-    mapping:
-      bipolar: true
+  - id: encoder_14
+    name: Limit Release
+    type: encoder
+    cc: 27
+    channel: global
+    range: [0, 127]
+    description: Limiter release time (0.01-1s)
+    plugin_parameter: "27"
 
-  - id: "eq_low_mid_q"
-    description: "EQ Low-Mid Q Factor"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 39
-      behavior:
-        mode: "absolute"
-        curve: "exponential"
-    pluginTarget:
-      type: "parameter"
-      identifier: "40"
-      name: "EQ Low-Mid Q"
-      range:
-        min: 0.1
-        max: 10.0
-        default: 1.0
-      category: "EQ"
-    mapping:
-      scaling: "exponential"
+  - id: encoder_15
+    name: Encoder 15
+    type: encoder
+    cc: 28
+    channel: global
+    range: [0, 127]
+    description: Unassigned - map to plugin-specific parameter
 
-  - id: "eq_high_mid_freq"
-    description: "EQ High-Mid Frequency"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 24
-      behavior:
-        mode: "absolute"
-        curve: "exponential"
-    pluginTarget:
-      type: "parameter"
-      identifier: "16"
-      name: "EQ High-Mid Freq"
-      range:
-        min: 1000.0
-        max: 10000.0
-        default: 3000.0
-      units: "Hz"
-      category: "EQ"
-    mapping:
-      scaling: "exponential"
+  - id: encoder_16
+    name: Low Shelf
+    type: encoder
+    cc: 29
+    channel: global
+    range: [0, 127]
+    description: Low frequency shelf filter
+    plugin_parameter: "3"
 
-  - id: "eq_high_mid_gain"
-    description: "EQ High-Mid Gain"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 32
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "15"
-      name: "EQ High-Mid Gain"
-      range:
-        min: -15.0
-        max: 15.0
-        default: 0.0
-      units: "dB"
-      category: "EQ"
-    mapping:
-      bipolar: true
+  # Third Row - EQ Gains & Controls (Encoders 17-24)
+  - id: encoder_17
+    name: EQ Low Gain
+    type: encoder
+    cc: 30
+    channel: global
+    range: [0, 127]
+    description: EQ low gain (-15 to +15dB)
+    plugin_parameter: "11"
 
-  - id: "eq_high_mid_q"
-    description: "EQ High-Mid Q Factor"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 40
-      behavior:
-        mode: "absolute"
-        curve: "exponential"
-    pluginTarget:
-      type: "parameter"
-      identifier: "41"
-      name: "EQ High-Mid Q"
-      range:
-        min: 0.1
-        max: 10.0
-        default: 1.0
-      category: "EQ"
-    mapping:
-      scaling: "exponential"
+  - id: encoder_18
+    name: EQ Low-Mid Gain
+    type: encoder
+    cc: 31
+    channel: global
+    range: [0, 127]
+    description: EQ low-mid gain (-15 to +15dB)
+    plugin_parameter: "13"
 
+  - id: encoder_19
+    name: EQ High-Mid Gain
+    type: encoder
+    cc: 32
+    channel: global
+    range: [0, 127]
+    description: EQ high-mid gain (-15 to +15dB)
+    plugin_parameter: "15"
 
-  - id: "eq_high_freq"
-    description: "EQ High Frequency"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 25
-      behavior:
-        mode: "absolute"
-        curve: "exponential"
-    pluginTarget:
-      type: "parameter"
-      identifier: "18"
-      name: "EQ High Freq"
-      range:
-        min: 5000.0
-        max: 20000.0
-        default: 10000.0
-      units: "Hz"
-      category: "EQ"
-    mapping:
-      scaling: "exponential"
+  - id: encoder_20
+    name: EQ High Gain
+    type: encoder
+    cc: 33
+    channel: global
+    range: [0, 127]
+    description: EQ high gain (-15 to +15dB)
+    plugin_parameter: "17"
 
-  - id: "eq_high_gain"
-    description: "EQ High Gain"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 33
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "17"
-      name: "EQ High Gain"
-      range:
-        min: -15.0
-        max: 15.0
-        default: 0.0
-      units: "dB"
-      category: "EQ"
-    mapping:
-      bipolar: true
+  - id: encoder_21
+    name: Comp Gain
+    type: encoder
+    cc: 34
+    channel: global
+    range: [0, 127]
+    description: Compressor makeup gain (0-20dB)
+    plugin_parameter: "24"
 
-  - id: "eq_high_peak"
-    description: "EQ High Peak/Shelf Switch"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 41
-      behavior:
-        mode: "toggle"
-    pluginTarget:
-      type: "parameter"
-      identifier: "42"
-      name: "EQ High Peak"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 0.0
-      category: "EQ"
+  - id: encoder_22
+    name: Limit Gain
+    type: encoder
+    cc: 35
+    channel: global
+    range: [0, 127]
+    description: Limiter output gain (-10 to +10dB)
+    plugin_parameter: "28"
 
-  # Compressor Section
-  - id: "comp_threshold"
-    description: "Compressor Threshold"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 10
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "21"
-      name: "Comp Threshold"
-      range:
-        min: -40.0
-        max: 0.0
-        default: -10.0
-      units: "dB"
-      category: "Compressor"
+  - id: encoder_23
+    name: Encoder 23
+    type: encoder
+    cc: 36
+    channel: global
+    range: [0, 127]
+    description: Unassigned - map to plugin-specific parameter
 
-  - id: "comp_ratio"
-    description: "Compressor Ratio"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 18
-      behavior:
-        mode: "absolute"
-        curve: "exponential"
-    pluginTarget:
-      type: "parameter"
-      identifier: "22"
-      name: "Comp Ratio"
-      range:
-        min: 1.0
-        max: 20.0
-        default: 3.0
-      category: "Compressor"
-    mapping:
-      scaling: "exponential"
+  - id: encoder_24
+    name: Encoder 24
+    type: encoder
+    cc: 37
+    channel: global
+    range: [0, 127]
+    description: Unassigned - map to plugin-specific parameter
 
-  - id: "comp_release"
-    description: "Compressor Release Time"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 26
-      behavior:
-        mode: "absolute"
-        curve: "exponential"
-    pluginTarget:
-      type: "parameter"
-      identifier: "23"
-      name: "Comp Release"
-      range:
-        min: 0.1
-        max: 5.0
-        default: 0.5
-      units: "seconds"
-      category: "Compressor"
-    mapping:
-      scaling: "exponential"
+  # Sliders - Main Section Controls
+  - id: slider_1
+    name: Comp Threshold
+    type: slider
+    cc: 10
+    channel: global
+    range: [0, 127]
+    description: Compressor threshold (-40 to 0dB)
+    plugin_parameter: "21"
 
-  - id: "comp_gain"
-    description: "Compressor Makeup Gain"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 34
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "24"
-      name: "Comp Gain"
-      range:
-        min: 0.0
-        max: 20.0
-        default: 0.0
-      units: "dB"
-      category: "Compressor"
+  - id: slider_2
+    name: Limit Threshold
+    type: slider
+    cc: 11
+    channel: global
+    range: [0, 127]
+    description: Limiter threshold (-20 to 0dB)
+    plugin_parameter: "26"
 
-  - id: "comp_dry_wet"
-    description: "Compressor Dry/Wet Mix"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 17
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "25"
-      name: "Comp Dry/Wet"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 1.0
-      category: "Compressor"
+  - id: slider_3
+    name: Tape Output
+    type: slider
+    cc: 12
+    channel: global
+    range: [0, 127]
+    description: Tape output level (-10 to +10dB)
+    plugin_parameter: "31"
 
-  - id: "comp_enable"
-    description: "Compressor In/Out"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 50
-      behavior:
-        mode: "toggle"
-    pluginTarget:
-      type: "parameter"
-      identifier: "44"
-      name: "Comp In/Out"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 1.0
-      category: "Compressor"
+  - id: slider_4
+    name: EQ Low-Mid Q
+    type: slider
+    cc: 39
+    channel: global
+    range: [0, 127]
+    description: EQ low-mid Q factor (0.1-10)
+    plugin_parameter: "40"
 
-  # Limiter Section
-  - id: "limit_threshold"
-    description: "Limiter Threshold"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 11
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "26"
-      name: "Limit Threshold"
-      range:
-        min: -20.0
-        max: 0.0
-        default: -3.0
-      units: "dB"
-      category: "Limiter"
+  - id: slider_5
+    name: EQ High-Mid Q
+    type: slider
+    cc: 40
+    channel: global
+    range: [0, 127]
+    description: EQ high-mid Q factor (0.1-10)
+    plugin_parameter: "41"
 
-  - id: "limit_mix"
-    description: "Limiter Wet/Dry Mix"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 19
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "29"
-      name: "Limit Mix"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 1.0
-      category: "Limiter"
+  - id: slider_6
+    name: Slider 6
+    type: slider
+    cc: 42
+    channel: global
+    range: [0, 127]
+    description: Unassigned - map to plugin-specific parameter
 
-  - id: "limit_release"
-    description: "Limiter Release Time"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 27
-      behavior:
-        mode: "absolute"
-        curve: "exponential"
-    pluginTarget:
-      type: "parameter"
-      identifier: "27"
-      name: "Limit Release"
-      range:
-        min: 0.01
-        max: 1.0
-        default: 0.1
-      units: "seconds"
-      category: "Limiter"
-    mapping:
-      scaling: "exponential"
+  - id: slider_7
+    name: Slider 7
+    type: slider
+    cc: 43
+    channel: global
+    range: [0, 127]
+    description: Unassigned - map to plugin-specific parameter
 
-  - id: "limit_gain"
-    description: "Limiter Output Gain"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 35
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "28"
-      name: "Limit Gain"
-      range:
-        min: -10.0
-        max: 10.0
-        default: 0.0
-      units: "dB"
-      category: "Limiter"
-    mapping:
-      bipolar: true
+  - id: slider_8
+    name: High Shelf
+    type: slider
+    cc: 53
+    channel: global
+    range: [0, 127]
+    description: High frequency shelf filter
+    plugin_parameter: "4"
 
-  - id: "limit_enable"
-    description: "Limiter In/Out"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 51
-      behavior:
-        mode: "toggle"
-    pluginTarget:
-      type: "parameter"
-      identifier: "46"
-      name: "Limit In/Out"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 1.0
-      category: "Limiter"
+  # Buttons - Section Enables & Modes
+  - id: button_row_1
+    name: Section Controls Row 1
+    type: button_group
+    buttons:
+      - id: button_1
+        name: Mic Pre Polarity
+        cc: 37
+        channel: global
+        mode: toggle
+        plugin_parameter: "33"
+      - id: button_2
+        name: EQ Low Peak
+        cc: 38
+        channel: global
+        mode: toggle
+        plugin_parameter: "39"
+      - id: button_3
+        name: EQ High Peak
+        cc: 41
+        channel: global
+        mode: toggle
+        plugin_parameter: "42"
+      - id: button_4
+        name: Edit Window
+        cc: 44
+        channel: global
+        mode: toggle
+        plugin_parameter: "window"
+      - id: button_5
+        name: Mic Pre Enable
+        cc: 45
+        channel: global
+        mode: toggle
+        plugin_parameter: "35"
+      - id: button_6
+        name: EQ Enable
+        cc: 46
+        channel: global
+        mode: toggle
+        plugin_parameter: "43"
+      - id: button_7
+        name: Button 7
+        cc: 47
+        channel: global
+        mode: momentary
+      - id: button_8
+        name: Button 8
+        cc: 48
+        channel: global
+        mode: momentary
 
-  # Tape Saturation Section
-  - id: "tape_drive"
-    description: "Tape Saturation Drive"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 20
-      behavior:
-        mode: "absolute"
-        curve: "exponential"
-    pluginTarget:
-      type: "parameter"
-      identifier: "30"
-      name: "Tape Drive"
-      range:
-        min: 0.0
-        max: 1.0
-        default: 0.2
-      category: "Tape"
-    mapping:
-      scaling: "exponential"
+  - id: button_row_2
+    name: Section Controls Row 2
+    type: button_group
+    buttons:
+      - id: button_9
+        name: Button 9
+        cc: 49
+        channel: global
+        mode: momentary
+      - id: button_10
+        name: Comp Enable
+        cc: 50
+        channel: global
+        mode: toggle
+        plugin_parameter: "44"
+      - id: button_11
+        name: Limit Enable
+        cc: 51
+        channel: global
+        mode: toggle
+        plugin_parameter: "46"
+      - id: button_12
+        name: Plugin Bypass
+        cc: 52
+        channel: global
+        mode: toggle
+        plugin_parameter: "bypass"
+      - id: button_13
+        name: Button 13
+        cc: 53
+        channel: global
+        mode: momentary
+      - id: button_14
+        name: Button 14
+        cc: 54
+        channel: global
+        mode: momentary
+      - id: button_15
+        name: Button 15
+        cc: 55
+        channel: global
+        mode: momentary
+      - id: button_16
+        name: Button 16
+        cc: 56
+        channel: global
+        mode: momentary
 
-  - id: "tape_output"
-    description: "Tape Output Level"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 12
-      behavior:
-        mode: "absolute"
-        curve: "linear"
-    pluginTarget:
-      type: "parameter"
-      identifier: "31"
-      name: "Tape Output"
-      range:
-        min: -10.0
-        max: 10.0
-        default: 0.0
-      units: "dB"
-      category: "Tape"
-    mapping:
-      bipolar: true
+notes: |
+  Analog Obsession CHANNEV mapping for Novation Launch Control XL 3
 
-  # Global Controls
-  - id: "edit_window"
-    description: "Toggle Plugin Edit Window"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 44
-      behavior:
-        mode: "toggle"
-    pluginTarget:
-      type: "parameter"
-      identifier: "window"
-      name: "Edit Window"
-      category: "Global"
+  This mapping is optimized for the CHANNEV Neve-style channel strip plugin,
+  providing comprehensive control over all major sections:
 
-  - id: "plugin_bypass"
-    description: "Plugin Bypass Toggle"
-    midiInput:
-      type: "cc"
-      channel: 1
-      number: 52
-      behavior:
-        mode: "toggle"
-    pluginTarget:
-      type: "bypass"
-      identifier: "bypass"
-      name: "Plugin Bypass"
-      category: "Global"
+  Key sections:
+  - Microphone Preamp: Gain, polarity, enable
+  - Line Amplifier: Independent gain control
+  - EQ Section: 4-band EQ with frequency, gain, and Q controls
+  - Compressor: Threshold, ratio, release, makeup gain, dry/wet
+  - Limiter: Threshold, release, output gain, wet/dry mix
+  - Tape Saturation: Drive and output level controls
+  - Filters: High-pass and shelf filters
+
+  The mapping follows the original Launch Control XL 3 CC assignments
+  from the legacy format while providing intuitive control layout:
+
+  - Top row encoders: Input stages and dynamics processing
+  - Middle row encoders: EQ frequencies and timing controls
+  - Bottom row encoders: EQ gains and output controls
+  - Sliders: Main level controls and Q factors
+  - Buttons: Section enables, modes, and utility functions
+
+  Plugin-specific features:
+  - Neve-style musical EQ curves
+  - Vintage-modeled compression and limiting
+  - Tape saturation for analog warmth
+  - Individual section bypass controls
