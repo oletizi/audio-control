@@ -164,8 +164,8 @@ function findCanonicalTemplates(mapsDir: string): string[] {
  * Generate device-specific Ardour filename
  */
 function generateDeviceFilename(manufacturer: string, model: string): string {
-  const cleanManufacturer = manufacturer.toLowerCase().replace(/\\s+/g, '-');
-  const cleanModel = model.toLowerCase().replace(/\\s+/g, '-');
+  const cleanManufacturer = manufacturer.toLowerCase().replace(/\s+/g, '-');
+  const cleanModel = model.toLowerCase().replace(/\s+/g, '-');
   return `${cleanManufacturer}-${cleanModel}.map`;
 }
 
@@ -285,9 +285,13 @@ async function createConsolidatedMap(deviceGroup: DeviceGroup): Promise<any> {
       // Handle button groups
       if (control.type === 'button_group' && control.buttons) {
         for (const button of control.buttons) {
-          const ardourBinding = button.plugin_parameter ?
-            { uri: `/route/plugin/parameter S1 1 ${button.plugin_parameter}` } :
-            getGenericArdourBinding({ name: button.name, type: 'button' });
+          // Skip buttons without plugin parameters to avoid transport-stop fallbacks
+          if (!button.plugin_parameter) {
+            console.log(`    Skipping unmapped button: ${button.name} (CC ${button.cc})`);
+            continue;
+          }
+
+          const ardourBinding = { uri: `/route/plugin/parameter S1 1 ${button.plugin_parameter}` };
 
           ardourBuilder.addNoteBinding({
             channel: midiChannel,
