@@ -49,7 +49,7 @@ const ButtonDefinitionSchema = z.object({
   cc: z.number().min(0).max(127),
   channel: z.union([z.string(), z.number()]),
   mode: z.enum(['toggle', 'momentary']),
-  plugin_parameter: z.string().optional(),
+  plugin_parameter: z.union([z.string(), z.number()]).optional(),
 });
 
 const ControlDefinitionSchema = z.object({
@@ -61,7 +61,7 @@ const ControlDefinitionSchema = z.object({
   range: z.array(z.number()).length(2).optional(),
   description: z.string().optional(),
   mode: z.enum(['toggle', 'momentary']).optional(),
-  plugin_parameter: z.string().optional(),
+  plugin_parameter: z.union([z.string(), z.number()]).optional(),
   buttons: z.array(ButtonDefinitionSchema).optional(),
 });
 

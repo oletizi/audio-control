@@ -39,7 +39,7 @@ export interface ControlDefinition {
   range?: number[];
   description?: string;
   mode?: 'toggle' | 'momentary';
-  plugin_parameter?: string;
+  plugin_parameter?: string | number;
   buttons?: ButtonDefinition[];
 }
 
@@ -49,7 +49,7 @@ export interface ButtonDefinition {
   cc: number;
   channel: string | number;
   mode: 'toggle' | 'momentary';
-  plugin_parameter?: string;
+  plugin_parameter?: string | number;
 }
 
 // Legacy interface for backwards compatibility during migration

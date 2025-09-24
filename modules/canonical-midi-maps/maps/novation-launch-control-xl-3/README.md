@@ -34,7 +34,7 @@ The foundation mapping extracted from Novation Components editor with the follow
 
 #### Sliders (CC 53-60)
 - **CC 53**: Attack - Envelope attack time
-- **CC 54**: Decay - Envelope decay time
+- **CC 54**: Decay - Envelope decay timeL
 - **CC 55**: Sustain - Envelope sustain level
 - **CC 56**: Release - Envelope release time
 - **CC 57**: Osc Mix - OSC1/OSC2 balance
