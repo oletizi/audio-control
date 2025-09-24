@@ -15,10 +15,16 @@ export interface ArdourBinding {
   momentary?: 'yes' | 'no';
 }
 
+export interface ArdourBindingGroup {
+  comment?: string;
+  bindings: ArdourBinding[];
+}
+
 export interface ArdourMidiMap {
   name: string;
   version?: string;
   bindings: ArdourBinding[];
+  bindingGroups?: ArdourBindingGroup[];
   deviceInfo?: ArdourDeviceInfo;
 }
 

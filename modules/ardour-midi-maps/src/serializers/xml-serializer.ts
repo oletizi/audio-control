@@ -25,7 +25,30 @@ export class ArdourXMLSerializer {
       lines.push(this.serializeDeviceInfoElement(midiMap.deviceInfo));
     }
 
-    for (const binding of midiMap.bindings) {
+    // Serialize binding groups with comments if available
+    if (midiMap.bindingGroups && midiMap.bindingGroups.length > 0) {
+      for (const group of midiMap.bindingGroups) {
+        // Add comment for the group
+        if (group.comment) {
+          lines.push(this.indent + `<!-- ${this.escapeXML(group.comment)} -->`);
+        }
+
+        // Add all bindings in this group
+        for (const binding of group.bindings) {
+          lines.push(this.indent + this.serializeBinding(binding));
+        }
+
+        // Add empty line between groups for readability
+        if (group !== midiMap.bindingGroups[midiMap.bindingGroups.length - 1]) {
+          lines.push('');
+        }
+      }
+    }
+
+    // Add any ungrouped bindings
+    for (const binding of midiMap.bindings.filter(binding =>
+      !midiMap.bindingGroups?.some(group => group.bindings.includes(binding))
+    )) {
       lines.push(this.indent + this.serializeBinding(binding));
     }
 

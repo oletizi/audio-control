@@ -1,4 +1,4 @@
-import type { ArdourBinding, ArdourMidiMap, ArdourFunction, ArdourDeviceInfo } from '../types/ardour.js';
+import type { ArdourBinding, ArdourMidiMap, ArdourFunction, ArdourDeviceInfo, ArdourBindingGroup } from '../types/ardour.js';
 
 export interface MidiMapBuilderOptions {
   name: string;
@@ -30,6 +30,8 @@ export interface EncoderRelativeBindingOptions extends BindingOptions {
 
 export class MidiMapBuilder {
   private bindings: ArdourBinding[] = [];
+  private bindingGroups: ArdourBindingGroup[] = [];
+  private currentGroup: ArdourBindingGroup | null = null;
   private readonly name: string;
   private readonly version: string | undefined;
   private readonly deviceInfo: ArdourDeviceInfo | undefined;
@@ -38,6 +40,21 @@ export class MidiMapBuilder {
     this.name = options.name;
     this.version = options.version;
     this.deviceInfo = options.deviceInfo;
+  }
+
+  addChannelComment(channel: number, pluginName: string): this {
+    // Finalize current group if exists
+    if (this.currentGroup && this.currentGroup.bindings.length > 0) {
+      this.bindingGroups.push(this.currentGroup);
+    }
+
+    // Start new group with comment
+    this.currentGroup = {
+      comment: `MIDI Channel ${channel}: ${pluginName}`,
+      bindings: []
+    };
+
+    return this;
   }
 
   addCCBinding(options: CCBindingOptions): this {
@@ -53,7 +70,13 @@ export class MidiMapBuilder {
     if (options.momentary) binding.momentary = 'yes';
     if (options.threshold !== undefined) binding.threshold = options.threshold;
 
-    this.bindings.push(binding);
+    // Add to current group if exists, otherwise add to general bindings
+    if (this.currentGroup) {
+      this.currentGroup.bindings.push(binding);
+    } else {
+      this.bindings.push(binding);
+    }
+
     return this;
   }
 
@@ -69,7 +92,13 @@ export class MidiMapBuilder {
     if (options.momentary) binding.momentary = 'yes';
     if (options.threshold !== undefined) binding.threshold = options.threshold;
 
-    this.bindings.push(binding);
+    // Add to current group if exists, otherwise add to general bindings
+    if (this.currentGroup) {
+      this.currentGroup.bindings.push(binding);
+    } else {
+      this.bindings.push(binding);
+    }
+
     return this;
   }
 
@@ -84,7 +113,13 @@ export class MidiMapBuilder {
     if (options.action !== undefined) binding.action = options.action;
     if (options.threshold !== undefined) binding.threshold = options.threshold;
 
-    this.bindings.push(binding);
+    // Add to current group if exists, otherwise add to general bindings
+    if (this.currentGroup) {
+      this.currentGroup.bindings.push(binding);
+    } else {
+      this.bindings.push(binding);
+    }
+
     return this;
   }
 
@@ -144,10 +179,25 @@ export class MidiMapBuilder {
   }
 
   build(): ArdourMidiMap {
+    // Finalize current group if exists
+    if (this.currentGroup && this.currentGroup.bindings.length > 0) {
+      this.bindingGroups.push(this.currentGroup);
+    }
+
+    // Flatten all bindings for the final map
+    const allBindings = [
+      ...this.bindings,
+      ...this.bindingGroups.flatMap(group => group.bindings)
+    ];
+
     const map: ArdourMidiMap = {
       name: this.name,
-      bindings: [...this.bindings],
+      bindings: allBindings,
     };
+
+    if (this.bindingGroups.length > 0) {
+      map.bindingGroups = [...this.bindingGroups];
+    }
 
     if (this.version !== undefined) {
       map.version = this.version;
@@ -162,10 +212,12 @@ export class MidiMapBuilder {
 
   clear(): this {
     this.bindings = [];
+    this.bindingGroups = [];
+    this.currentGroup = null;
     return this;
   }
 
   getBindingCount(): number {
-    return this.bindings.length;
+    return this.bindings.length + this.bindingGroups.reduce((total, group) => total + group.bindings.length, 0);
   }
 }
